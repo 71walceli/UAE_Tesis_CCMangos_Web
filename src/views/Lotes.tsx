@@ -1,93 +1,202 @@
-import React, { useEffect, useState } from 'react';
-import MapContainer from './../components/Map'; // Asegúrate de importar el componente MapContainer desde el lugar correcto
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { BaseLayout } from '../components/BaseLayout';
-import { Spinner } from 'react-bootstrap';
 import { CustomTable } from '../components/CustomTable';
 import { Endpoints } from '../api/routes';
 import { ILote } from '../interfaces/modeld';
 import { useRequest } from '../api/UseRequest';
-const columns = [
-  {
-    dataField: 'Codigo_Lote',
-    text: 'Codigo',
-    //headerStyle: { backgroundColor: '#00553c',color:'#ffffff', },
-  },
-  {
-    dataField: 'Nombre',
-    text: 'Nombre',
-    //headerStyle: { backgroundColor: '#00553c',color:'#ffffff', },
-  },
-  {
-    dataField: 'Hectareas',
-    text: 'Hectareas',
-    //headerStyle: { backgroundColor: '#00553c',color:'#ffffff', },
-  },
-  {
-    dataField: 'Variedad',
-    text: 'Variedad',
-    //headerStyle: { backgroundColor: '#00553c',color:'#ffffff', },
-  }/* ,
-  {
-    dataField: 'acciones',
-    text: 'Acciones',
-    //headerStyle: { backgroundColor: '#00553c',color:'#ffffff', },
-    style: { textAlign: 'center', magin: 5, },
-    formatter: (cell, row) => (
-      <div>
-        <button className="btn btn-sm btn-primary"><i className="bi bi-pencil-square"></i></button>
-        <button className="btn btn-sm btn-danger"><i className="bi bi-trash"></i></button>
-      </div>
-    ),
-  }, */
-];
-export const Lotes: React.FC = () => {
-  const { getRequest } = useRequest();
-  const [data, setData] = useState<ILote[]>([]);
-  const center = { lat: 40.7128, lng: -74.0060 }; // Coordenadas de Nueva York
-  const initialZoom = 12;
+import { textFilter, selectFilter } from 'react-bootstrap-table2-filter';
+import { Button, ButtonToolbar, Modal } from 'react-bootstrap';
+import { GenericForm } from '../components/Form';
+import { AuthContext } from '../context/AuthContext';
+import { useLoader } from '../hooks/useLoader';
+import { CircleIconButton } from '../components/CircleIconButton';
 
-  const polygons = [
+
+export const Lotes: React.FC = () => {
+  const { showLoader, hideLoader } = useLoader();
+  const { getRequest, postRequest } = useRequest();
+  const [data, setData] = useState<ILote[]>([]);
+  
+  const options = useMemo(
+    () => data.map(e => e.Variedad).reduce((o, v) => Object.assign(o, {[v]: v}), {})
+    , [data]
+  );
+  const columns = [
     {
-      paths: [
-        { lat: 40.7128, lng: -74.0060 },
-        { lat: 40.7128, lng: -74.0160 },
-        { lat: 40.7028, lng: -74.0160 },
-        { lat: 40.7028, lng: -74.0060 },
-      ],
-      options: {
-        fillColor: 'blue',
-        fillOpacity: 0.5,
-        strokeColor: 'red',
-        strokeWeight: 2,
-      },
+      dataField: 'Codigo_Lote',
+      text: 'Codigo',
+      sort: true,
+      filter: textFilter(),
     },
-    // Otros polígonos...
+    {
+      dataField: 'Nombre',
+      text: 'Nombre',
+      sort: true,
+      filter: textFilter(),
+    },
+    {
+      dataField: 'Hectareas',
+      text: 'Hectareas',
+      sort: true,
+    },
+    {
+      dataField: 'Variedad',
+      text: 'Variedad',
+      sort: true,
+      filter: selectFilter({
+        options: options
+      }),
+    },
   ];
-  const GetData = async () => {
+  
+  const variedades = [
+    "Ataulfo",
+    "Kent",
+    "Tommy Atkins",
+  ]
+  const [registro, setRecord] = useState({
+    Id_Proyecto: 1,  // TODO Permitir seleccionar el proyecto
+    Codigo_Lote: "",
+    Nombre: "",
+    Variedad: { label: "<Seleccionar>", value: "" },
+  })
+  
+  const cargarDatos = async () => {
     await getRequest<ILote[]>(Endpoints.lotes)
-      .then((e) => {
-        setData(e)
-        //console.log(e);
+      .then((lotes) => {
+        setData(lotes);
       })
-      .catch((error) => console.log(error));
+      .catch(console.error);
   };
   useEffect(() => {
-    // Realiza una solicitud a la API para obtener los datos
-    GetData();
+    (async () => {
+      showLoader()
+      await cargarDatos();
+      hideLoader()
+    })()
   }, []);
+
+  const [showForm, setShowForm] = useState(false);
+
+  const handleClose = () => setShowForm(false);
+  const handleShow = () => setShowForm(true);
+
+  const {UserData} = useContext(AuthContext)
+  const guardar = () => {
+    (async () => {
+      showLoader()
+      const nuevoRegistro: ILote = {
+        ...registro,
+        Variedad: registro.Variedad.value,
+        Usuario: UserData?.usuario.user || -1,
+      };
+
+      await postRequest<ILote[]>(Endpoints.lotes, nuevoRegistro)
+        .then((lotes) => {
+          console.log({ lotes });
+          handleClose()
+        })
+        .catch(console.error);
+      await cargarDatos()
+      hideLoader()
+    })();
+  };
+
+  const handleInputChange = (name: string, value: string) => {
+    setRecord(v => ({
+      ...v,
+      [name]: value,
+    }));
+    console.log({ name, value })
+  };
+
+  const [selection, setSelection] = useState<number>()
+  const selectionSettings = {
+    mode: 'radio',
+    clickToSelect: true,
+    onSelect: (cell, row) => {
+      setSelection(cell.id)
+    },
+  };
+  useEffect(() => console.log({ selection }), [selection])
+
   return (
     <BaseLayout PageName='Lotes'>
-      <div className="row">
-       {/*  <div className="col-md-12 text-center">
-          <h1>Pantalla en progreso...<Spinner animation="border" variant='success' /></h1>
-        </div> */}
-      </div>
       {/* <MapContainer initialCenter={center} polygons={polygons} /> */}
-      <div className="container">
-        <div className="row">
-        <CustomTable columns={columns} data={data}></CustomTable>
-      </div>
-      </div>
+      {data.length 
+        && 
+        <div className="container">
+          <div className="d-flex justify-content-end">
+            <CircleIconButton icon="bi bi-plus" title="Nuevo" onPress={handleShow} />
+            <span style={{ width: 15 }} />
+            <CircleIconButton icon="bi bi-pen" title="Editar" color='#ffc' disabled={!selection} />
+            <span style={{ width: 15 }} />
+            <CircleIconButton icon="bi bi-trash" title="Eliminar" color='pink' disabled={!selection} />
+          </div>
+          <hr />
+          <div className="row">
+            <CustomTable columns={columns} data={data} selectRow={selectionSettings} keyField="id" />
+          </div>
+        </div>
+      }
+      <Modal show={showForm} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Registar Registro</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <GenericForm
+            showSubmit={false}
+            fields={[
+              {
+                name: "Codigo",
+                label: "Código",
+                bclass: "form-control",
+                placeholder: "Ingrese el código",
+                value: registro.Codigo_Lote, // Establece el valor de password desde el estado formData
+                onChange: (value) => handleInputChange("Codigo_Lote", value), // Maneja los cambios en el password
+              },
+              {
+                name: "Nombre",
+                label: "Nombre",
+                bclass: "form-control",
+                placeholder: "Escriba el nombre del lote",
+                value: registro.Nombre, // Establece el valor de username desde el estado formData
+                onChange: (value) => handleInputChange("Nombre", value), // Maneja los cambios en el username
+              },
+              {
+                name: "Variedad",
+                label: "Variedad",
+                bclass: "form-control",
+                placeholder: "Ingrese el código",
+                inputType:"select",
+                options: variedades.map(v => ({
+                  label: v,
+                  value: v,
+                })),
+                value: registro.Variedad, // Establece el valor de password desde el estado formData
+                onChange: (value) => handleInputChange("Variedad", value), // Maneja los cambios en el password
+              },
+              // TODO Agregar mapa
+            ]}
+            onSubmit={guardar}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <div className="d-flex justify-content-end">
+            <CircleIconButton 
+              color='pink'
+              title="Cerrar"  
+              onPress={handleClose} 
+            />
+            <span style={{ width: 15 }} />
+            <CircleIconButton 
+              icon="bi bi-floppy"
+              title="Guardar" 
+              onPress={guardar} 
+            />
+          </div>
+        </Modal.Footer>
+      </Modal>
       
     </BaseLayout>
   );
