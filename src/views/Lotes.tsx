@@ -4,7 +4,7 @@ import { BaseLayout } from '../components/BaseLayout';
 import { Spinner } from 'react-bootstrap';
 import { CustomTable } from '../components/CustomTable';
 import { Endpoints } from '../api/routes';
-import { ILote } from '../interfaces/AuthInterface';
+import { ILote } from '../interfaces/modeld';
 import { useRequest } from '../api/UseRequest';
 const columns = [
   {

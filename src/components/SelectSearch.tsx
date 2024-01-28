@@ -9,7 +9,8 @@ interface Option {
 }
 
 interface SelectSearchProps<T> {
-    value: string;
+    value: string | number;
+    onChange: (value: string | number) => void;
     label? : string;
     placeholder?: string;
     bclass?: string;
@@ -20,6 +21,7 @@ interface SelectSearchProps<T> {
 export const SelectSearch = ({
     options,
     value,
+    onChange,
     label,
     placeholder,
     bclass,
@@ -31,11 +33,13 @@ export const SelectSearch = ({
         <>
         {label && <label className="form-label">{label}</label>}
         <Select
-      closeMenuOnSelect={!multiOptions}
-      components={animatedComponents}
-      isMulti={multiOptions}
-      options={options}
-    />
+          closeMenuOnSelect={!multiOptions}
+          components={animatedComponents}
+          isMulti={multiOptions}
+          options={options}
+          value={value}
+          onChange={onChange}
+        />
         </>
 
     );

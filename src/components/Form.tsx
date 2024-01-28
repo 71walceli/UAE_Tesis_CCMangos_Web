@@ -43,42 +43,43 @@ export const GenericForm = ({ fields, onSubmit, showSubmit = true, accept='*' }:
               />
             ) : field.inputType === "select" && field.options ? (
               <SelectSearch
-              label={field.label}
-              bclass={field.bclass}
-              options={field.options}
-              value={field.value}
+                label={field.label}
+                bclass={field.bclass}
+                options={field.options}
+                value={field.value}
+                onChange={field.onChange}
             />
             
             ) : field.inputType==='password'?(
               <Input
-              {...field}
-              label={field.label}
-              type={field.inputType}
-              bclass={field.bclass}
-              placeholder={field.placeholder}
-              value={field.value}
-              onChange={field.onChange}
+                {...field}
+                label={field.label}
+                type={field.inputType}
+                bclass={field.bclass}
+                placeholder={field.placeholder}
+                value={field.value}
+                onChange={field.onChange}
             />
             ): field.inputType==='checkbox'?(
               <Input
-              {...field}
-              label={field.label}
-              type={field.inputType}
-              bclass={field.bclass}
-              placeholder={field.placeholder}
-              value={field.value}
-              onChange={field.onChange}
+                {...field}
+                label={field.label}
+                type={field.inputType}
+                bclass={field.bclass}
+                placeholder={field.placeholder}
+                value={field.value}
+                onChange={field.onChange}
             />
             ): field.inputType==='file'?(
               <Input
-              {...field}
-              label={field.label}
-              accept={accept}
-              type={field.inputType}
-              bclass={field.bclass}
-              placeholder={field.placeholder}
-              value={field.value}
-              onChange={field.onChange}
+                {...field}
+                label={field.label}
+                accept={accept}
+                type={field.inputType}
+                bclass={field.bclass}
+                placeholder={field.placeholder}
+                value={field.value}
+                onChange={field.onChange}
             />
             ): (
               // Renderizar otros tipos de entradas aquí

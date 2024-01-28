@@ -1,17 +1,18 @@
 @import "~bootstrap-icons/font/bootstrap-icons.css";
+
+
 .custom-table-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
-  
-  .custom-table-search {
-    flex: 1;
-    text-align: right;
-  }
-  
-  .custom-table-size-per-page {
-    flex: 1;
-    text-align: left;
-  }
-  
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.custom-table-search {
+  flex: 1;
+  text-align: right;
+}
+
+.custom-table-size-per-page {
+  flex: 1;
+  text-align: left;
+}

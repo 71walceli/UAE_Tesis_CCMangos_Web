@@ -7,20 +7,15 @@ import {
   ApiErrorResponse,
   AuthInterface,
   TokenResponse,
-} from "./../interfaces/AuthInterface";
+} from "../interfaces/modeld";
 import { useAuth } from "./../context/AuthContext";
 import { Endpoints } from "./routes";
 
 export const useRequest = () => {
-  //const { addAlert } = useContext(AlertContext);
   const { showLoader, hideLoader } = useLoader();
 
   //#region AxiosConfig
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-
   const {  login,  UserData, isAuthenticated } = useAuth();
-  // Create an axios instance for the UserData endpoint
   const ApiTokenRequest = axios.create({
     baseURL: Endpoints.BaseURL + Endpoints.Api + Endpoints.login,
     headers: {
@@ -29,7 +24,6 @@ export const useRequest = () => {
     method: "POST",
   });
 
-  // Create an axios instance for the other endpoints
   const ApiRequest = axios.create({
     baseURL: Endpoints.BaseURL + Endpoints.Api,
     headers: {
@@ -37,7 +31,6 @@ export const useRequest = () => {
       ...(UserData?.access_token !== ""  && UserData?.access_token !==undefined? { Authorization: `Bearer ${UserData?.access_token}` } : {}),
     },
   });
-
 
   const ApiPostFileRequest = axios.create({
     baseURL: Endpoints.BaseURL + Endpoints.Api,
@@ -47,21 +40,16 @@ export const useRequest = () => {
     },
   });
 
-
   const getRequest = async <T extends unknown>(
     endpoint: string,
     params?: object,
   ): Promise<T> => {
-    showLoader();
     return await ApiRequest.get(endpoint, { params })
       .then(({ data }: AxiosResponse<T>) => data)
       .catch((error: AxiosError<ApiErrorResponse>) => {
         //ShowAlertApiError(error);
         throw error;
       })
-      .finally(() => {
-        hideLoader();
-      });
   };
 
   const postRequest = async <T extends unknown>(
@@ -70,22 +58,17 @@ export const useRequest = () => {
     params?: object
   ): Promise<T> => {
     console.log("post??");
-    showLoader();
     return await ApiRequest.post(endpoint, data, { params })
       .then(({ data }: AxiosResponse<T>) => data)
       .catch((error: AxiosError<ApiErrorResponse>) => {
         //ShowAlertApiError(error);
         throw error;
       })
-      .finally(() => {
-        hideLoader();
-      });
   };
 
   const postRequestToken = async <T extends TokenResponse>(
     data: AuthInterface
   ): Promise<T> => {
-    showLoader();
     return await ApiTokenRequest.request({
       data,
     })
@@ -98,9 +81,6 @@ export const useRequest = () => {
         console.log(JSON.stringify(error, null, 3));
         throw error;
       })
-      .finally(() => {
-        hideLoader();
-      });
   };
 
   const postFileRequest = async <T extends unknown>(
@@ -108,17 +88,11 @@ export const useRequest = () => {
     data?: object,
     params?: object
   ): Promise<T> => {
-    showLoader();
     return await ApiPostFileRequest.post(endpoint, data, { params })
       .then(({ data }: AxiosResponse<T>) => data)
       .catch((error: AxiosError<ApiErrorResponse>) => {
-        //console.error(JSON.stringify(error, null, 3));
-        //ShowAlertApiError(error);
         throw error;
       })
-      .finally(() => {
-        hideLoader();
-      });
   };
 
   return { getRequest, postRequestToken, postRequest, postFileRequest };

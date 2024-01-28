@@ -1,10 +1,12 @@
-import React, {  useMemo } from 'react';
+import React, {  useMemo, useState } from 'react';
 import BootstrapTable from 'react-bootstrap-table-next';
 import cellEditFactory from 'react-bootstrap-table2-editor';
 import paginationFactory from 'react-bootstrap-table2-paginator';
+import filterFactory from 'react-bootstrap-table2-filter';
+import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 
-export const CustomTable = ({ columns, data }) => {
-  
+
+export const CustomTable = ({ columns, data, ...props }) => {
   return (
     <div>
       <BootstrapTable
@@ -27,7 +29,9 @@ export const CustomTable = ({ columns, data }) => {
         csvFileName="datos.csv" // Nombre del archivo CSV
         keyField="id" // Asegúrate de ajustar esto al campo de clave única de tus datos
         data={data}
+        filter={ filterFactory() }
         columns={columns}
+        {...props}
       />
       
     </div>

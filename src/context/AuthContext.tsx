@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { TokenResponse } from "../interfaces/AuthInterface";
+import { TokenResponse } from "../interfaces/modeld";
 
 // Definir la forma del contexto
 interface AuthContextProps {

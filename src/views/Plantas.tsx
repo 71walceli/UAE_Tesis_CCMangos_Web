@@ -3,13 +3,13 @@ import { BaseLayout } from '../components/BaseLayout';
 import { CustomTable } from '../components/CustomTable';
 import { Endpoints } from '../api/routes';
 import { useRequest } from '../api/UseRequest';
-import { IPlantas } from '../interfaces/AuthInterface';
+import { IPlantas } from '../interfaces/modeld';
 import { Modal } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import { GenericForm } from '../components/Form';
-//import { AlertContext, AlertType } from '../context/AlertContext';
-const columns = [
 
+
+const columns = [
   {
     dataField: 'Codigo_Planta',
     text: 'Código',
@@ -20,16 +20,9 @@ const columns = [
   },
   // Agrega más columnas según sea necesario
 ];
-const options = [
-  /* { value: "option1", label: "Opción 1" },
-  { value: "option2", label: "Opción 2" },
-  { value: "option3", label: "Opción 3" },
-  { value: "option4", label: "Opción 4" },
-  { value: "option5", label: "Opción 5" }, */
-];
+const options = [];
 
 export const Plantas = () => {
-  //const
   const { getRequest } = useRequest();
   const [data, setData] = useState<IPlantas[]>([]);
   const [Planta, setPLanta] = useState({
@@ -38,8 +31,6 @@ export const Plantas = () => {
     Id_Lote_id: 0,
   });
   const [show, setShow] = useState(false);
-  //const {  addAlert } = useContext(AlertContext);
-  //functions
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const handleInputChange = (name: string, value: string) => {
@@ -48,10 +39,7 @@ export const Plantas = () => {
       [name]: value,
     });
   };
-  const SavePlanta = () => {
-    // Realiza alguna lógica de autenticación aquí
-    //onLogin(formData.username, formData.password);
-    alert(JSON.stringify( Planta,null,3))
+  const Guardar = () => {
   };
   //call api
   const GetData = async () => {
@@ -63,7 +51,6 @@ export const Plantas = () => {
       .catch((error) => alert(error));
   };
   useEffect(() => {
-    // Realiza una solicitud a la API para obtener los datos
     GetData();
   }, []);
   return (
@@ -122,15 +109,15 @@ export const Plantas = () => {
                   onChange: (value) => handleInputChange("Id_Lote_id", value), // Maneja los cambios en el password
                 }
               ]}
-              onSubmit={SavePlanta}
+              onSubmit={Guardar}
             />
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleClose}>
-              Close
+              Cerrar
             </Button>
-            <Button variant="primary" onClick={SavePlanta}>
-              Save Changes
+            <Button variant="primary" onClick={Guardar}>
+              Guardar
             </Button>
           </Modal.Footer>
         </Modal>

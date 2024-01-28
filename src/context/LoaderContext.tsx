@@ -23,6 +23,7 @@ export const LoaderProvider = ({ children }: any) => {
   };
 
   return (
+    // TODO Apply smooth animation just like mobile app
     <LoaderContext.Provider value={{ isLoading, showLoader, hideLoader }}>
       {isLoading && <LoaderAnimation />}
       {children}

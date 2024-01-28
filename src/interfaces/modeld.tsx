@@ -3,11 +3,22 @@ export interface AuthInterface {
   password: string;
 }
 export interface TokenResponse {
-  user: string;
+  usuario: IProfile;
   rol:string;
   access_token: string;
   refresh_token: string;
 }
+
+export interface IProfile {
+  cedula: string;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  id: number;
+  user: number; // User ID
+}
+
 
 //ApirError
 export interface ApiErrorResponse {
@@ -23,13 +34,16 @@ export interface IPlantas {
   Id_Lote: number;
 }
 export interface ILote {
-  id: number;
+  id?: number;
+  Id_Proyecto: number;
   Codigo_Lote: string;
   Nombre: string;
-  Hectareas: number | null;
-  Variedad: null;
-  Id_Proyecto: number;
-  Activo: boolean;
+  Variedad: string;
+  Hectareas?: number;
+  Activo?: boolean;
+  Usuario: number;
+  Areas?: number[];
+  Poligonos?: number[];
 }
 export interface IUser {
   id:               number;
