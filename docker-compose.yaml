@@ -10,4 +10,5 @@ services:
     #restart: unless-stopped
     volumes:
       - .:/App
+      - ../Common:/Common
     working_dir: /App
