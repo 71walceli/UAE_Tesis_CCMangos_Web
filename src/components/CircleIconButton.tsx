@@ -5,7 +5,8 @@ import {colores, styles} from '../theme/appTheme';
 
 interface Props {
   // TODO Ponerle onPress o handlePress
-  onPress: (() => void) | (() => Promise<void>);
+  onPress?: () => void;
+  onClick?: () => void;
   title: string;
   color?: string;
   colorTexto?: string;
@@ -44,7 +45,7 @@ export const CircleIconButton = ({
     <TouchableOpacity
       activeOpacity={0.8}
       disabled={disabled}
-      onPress={onPress}
+      onPress={onPress || onclick}
       style={{
         height: alto,
         marginHorizontal: marginH,

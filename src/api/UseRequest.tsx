@@ -12,8 +12,6 @@ import { useAuth } from "./../context/AuthContext";
 import { Endpoints } from "./routes";
 
 export const useRequest = () => {
-  const { showLoader, hideLoader } = useLoader();
-
   //#region AxiosConfig
   const {  login,  UserData, isAuthenticated } = useAuth();
   const ApiTokenRequest = axios.create({

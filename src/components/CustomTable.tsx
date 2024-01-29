@@ -1,6 +1,5 @@
-import React, {  useMemo, useState } from 'react';
+import React, {   } from 'react';
 import BootstrapTable from 'react-bootstrap-table-next';
-import cellEditFactory from 'react-bootstrap-table2-editor';
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import filterFactory from 'react-bootstrap-table2-filter';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
@@ -10,7 +9,6 @@ export const CustomTable = ({ columns, data, ...props }) => {
   return (
     <div>
       <BootstrapTable
-        search={true}
         sizePerPage={25}
         pagination={paginationFactory({
           sizePerPageList: [

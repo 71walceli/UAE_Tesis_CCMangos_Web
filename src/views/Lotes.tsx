@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { BaseLayout } from '../components/BaseLayout';
 import { CustomTable } from '../components/CustomTable';
 import { Endpoints } from '../api/routes';
@@ -10,17 +10,18 @@ import { GenericForm } from '../components/Form';
 import { AuthContext } from '../context/AuthContext';
 import { useLoader } from '../hooks/useLoader';
 import { CircleIconButton } from '../components/CircleIconButton';
+import { useCoontroller } from '../controllers/useController';
+import useToaster from '../hooks/useToaster';
 
 
 export const Lotes: React.FC = () => {
-  const { showLoader, hideLoader } = useLoader();
-  const { getRequest, postRequest } = useRequest();
-  const [data, setData] = useState<ILote[]>([]);
+  const { records, save, findById, remove } = useCoontroller<ILote>(Endpoints.lotes)
   
-  const options = useMemo(
-    () => data.map(e => e.Variedad).reduce((o, v) => Object.assign(o, {[v]: v}), {})
-    , [data]
-  );
+  const variedades = [
+    "Ataulfo",
+    "Kent",
+    "Tommy Atkins",
+  ]
   const columns = [
     {
       dataField: 'Codigo_Lote',
@@ -44,105 +45,99 @@ export const Lotes: React.FC = () => {
       text: 'Variedad',
       sort: true,
       filter: selectFilter({
-        options: options
+        options: variedades.map(e => e.Variedad).reduce((o, v) => Object.assign(o, {[v]: v}), {})
       }),
     },
   ];
   
-  const variedades = [
-    "Ataulfo",
-    "Kent",
-    "Tommy Atkins",
-  ]
-  const [registro, setRecord] = useState({
-    Id_Proyecto: 1,  // TODO Permitir seleccionar el proyecto
-    Codigo_Lote: "",
-    Nombre: "",
-    Variedad: { label: "<Seleccionar>", value: "" },
+  const resetForm = (initial?: {
+    Id_Proyecto: number; 
+    Codigo_Lote: string; 
+    Nombre: string; 
+    Variedad: string; 
+  }) => ({
+    ...initial,
+    Id_Proyecto: initial?.Id_Proyecto ||  1,  // TODO Permitir seleccionar el proyecto
+    Codigo_Lote: initial?.Codigo_Lote || "",
+    Nombre: initial?.Nombre || "",
+    Variedad: initial?.Variedad 
+      ? { label: initial?.Variedad, value: initial?.Variedad} : { label: "<Seleccionar>", value: "" },
   })
-  
-  const cargarDatos = async () => {
-    await getRequest<ILote[]>(Endpoints.lotes)
-      .then((lotes) => {
-        setData(lotes);
-      })
-      .catch(console.error);
-  };
-  useEffect(() => {
-    (async () => {
-      showLoader()
-      await cargarDatos();
-      hideLoader()
-    })()
-  }, []);
+  const [formData, setFormData] = useState(resetForm())
+  useEffect(() => console.log({ formData }))
 
-  const [showForm, setShowForm] = useState(false);
+  const [ openModal, setOpenModal ] = useState<"form" | "delete" | null>(null);
 
-  const handleClose = () => setShowForm(false);
-  const handleShow = () => setShowForm(true);
+  //const handleShow = () => setShowForm(true);
+  const handleClose = () => setOpenModal(null);
 
-  const {UserData} = useContext(AuthContext)
-  const guardar = () => {
-    (async () => {
-      showLoader()
-      const nuevoRegistro: ILote = {
-        ...registro,
-        Variedad: registro.Variedad.value,
-        Usuario: UserData?.usuario.user || -1,
-      };
-
-      await postRequest<ILote[]>(Endpoints.lotes, nuevoRegistro)
-        .then((lotes) => {
-          console.log({ lotes });
-          handleClose()
-        })
-        .catch(console.error);
-      await cargarDatos()
-      hideLoader()
-    })();
-  };
+  const { UserData } = useContext(AuthContext)
 
   const handleInputChange = (name: string, value: string) => {
-    setRecord(v => ({
+    setFormData(v => ({
       ...v,
       [name]: value,
     }));
     console.log({ name, value })
   };
 
-  const [selection, setSelection] = useState<number>()
-  const selectionSettings = {
-    mode: 'radio',
-    clickToSelect: true,
-    onSelect: (cell, row) => {
-      setSelection(cell.id)
-    },
-  };
+  const [selection, setSelection] = useState<number | null>()
   useEffect(() => console.log({ selection }), [selection])
 
   return (
     <BaseLayout PageName='Lotes'>
       {/* <MapContainer initialCenter={center} polygons={polygons} /> */}
-      {data.length 
-        && 
-        <div className="container">
+      {records.length 
+        && <div className="container">
           <div className="d-flex justify-content-end">
-            <CircleIconButton icon="bi bi-plus" title="Nuevo" onPress={handleShow} />
+            <CircleIconButton icon="bi bi-plus" title="Nuevo" onPress={() => setOpenModal("form")}/>
             <span style={{ width: 15 }} />
-            <CircleIconButton icon="bi bi-pen" title="Editar" color='#ffc' disabled={!selection} />
+            <CircleIconButton icon="bi bi-pen" title="Editar" color='#ffc' disabled={!selection} 
+              onPress={() => {
+                setFormData(resetForm(findById(selection)))
+                setOpenModal("form")
+              }}
+            />
             <span style={{ width: 15 }} />
-            <CircleIconButton icon="bi bi-trash" title="Eliminar" color='pink' disabled={!selection} />
+            <CircleIconButton icon="bi bi-trash" title="Eliminar" color='pink' disabled={!selection} 
+              onPress={() => setOpenModal("delete")}
+            />
           </div>
           <hr />
           <div className="row">
-            <CustomTable columns={columns} data={data} selectRow={selectionSettings} keyField="id" />
+            <CustomTable columns={columns} data={records} 
+              selectRow={{
+                mode: 'radio',
+                clickToSelect: true,
+                selected: selection ? [selection] : [],
+                onSelect: (cell, row) => {
+                  console.log({ cell, row })
+                  setSelection(cell.id)
+                },
+              }} 
+              keyField="id" 
+              defaultSorted={[
+                {
+                  dataField: 'Codigo_Lote',
+                  order: 'asc'
+                },
+                {
+                  dataField: 'Nombre',
+                  order: 'asc'
+                },
+              ]}
+            />
           </div>
         </div>
       }
-      <Modal show={showForm} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Registar Registro</Modal.Title>
-        </Modal.Header>
+      <Modal show={openModal === "form"} onHide={handleClose} animation 
+        onExit={() => {
+          setSelection(null)
+        }}
+        onExited={() => {
+          setFormData(resetForm())
+        }}
+      >
         <Modal.Body>
           <GenericForm
             showSubmit={false}
@@ -152,7 +147,7 @@ export const Lotes: React.FC = () => {
                 label: "Código",
                 bclass: "form-control",
                 placeholder: "Ingrese el código",
-                value: registro.Codigo_Lote, // Establece el valor de password desde el estado formData
+                value: formData.Codigo_Lote, // Establece el valor de password desde el estado formData
                 onChange: (value) => handleInputChange("Codigo_Lote", value), // Maneja los cambios en el password
               },
               {
@@ -160,7 +155,7 @@ export const Lotes: React.FC = () => {
                 label: "Nombre",
                 bclass: "form-control",
                 placeholder: "Escriba el nombre del lote",
-                value: registro.Nombre, // Establece el valor de username desde el estado formData
+                value: formData.Nombre, // Establece el valor de username desde el estado formData
                 onChange: (value) => handleInputChange("Nombre", value), // Maneja los cambios en el username
               },
               {
@@ -173,12 +168,27 @@ export const Lotes: React.FC = () => {
                   label: v,
                   value: v,
                 })),
-                value: registro.Variedad, // Establece el valor de password desde el estado formData
+                value: formData.Variedad, // Establece el valor de password desde el estado formData
                 onChange: (value) => handleInputChange("Variedad", value), // Maneja los cambios en el password
               },
               // TODO Agregar mapa
             ]}
-            onSubmit={guardar}
+            onSubmit={() => {
+              (async () => {
+                const nuevoRegistro: ILote = {
+                  ...formData,
+                  Variedad: formData.Variedad.value,
+                  Usuario: UserData?.usuario.user || -1,
+                };
+
+                await save(nuevoRegistro)
+                  .then((lotes) => {
+                    console.log({ lotes });
+                    handleClose();
+                  })
+                  .catch(console.error);
+              })();
+            }}
           />
         </Modal.Body>
         <Modal.Footer>
@@ -192,7 +202,57 @@ export const Lotes: React.FC = () => {
             <CircleIconButton 
               icon="bi bi-floppy"
               title="Guardar" 
-              onPress={guardar} 
+              onPress={() => {
+                (async () => {
+                  const nuevoRegistro: ILote = {
+                    ...formData,
+                    Variedad: formData.Variedad.value,
+                    Usuario: UserData?.usuario.user || -1,
+                  };
+
+                  await save(nuevoRegistro)
+                    .then((lotes) => {
+                      console.log({ lotes });
+                      handleClose();
+                    })
+                    .catch(console.error);
+                })();
+              }} 
+            />
+          </div>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={openModal === "delete"} onHide={handleClose} animation 
+        onExit={() => {
+          setSelection(null)
+        }}
+        onExited={() => {
+          setFormData(resetForm())
+        }}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>¿Está seguro de eliminar {findById(selection)?.Codigo_Lote}?</Modal.Title>
+        </Modal.Header>
+        <Modal.Footer>
+          <div className="d-flex justify-content-end">
+            <CircleIconButton 
+              title="No"  
+              icon="bi bi-check"
+              onPress={handleClose} 
+              />
+            <span style={{ width: 15 }} />
+            <CircleIconButton 
+              color='pink'
+              icon="bi bi-x"
+              title="Sí" 
+              onPress={() => {
+                remove(findById(selection))
+                  .then(lote => {
+                    console.log({ lote })
+                    handleClose()
+                  })
+                  .catch(console.error)
+              }} 
             />
           </div>
         </Modal.Footer>
