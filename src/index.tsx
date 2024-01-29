@@ -1,11 +1,14 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
 import { GoogleMapsProvider } from "./context/MapContext";
 import { LoaderProvider } from "./context/LoaderContext";
 import { AlertProvider } from "./context/Alerts/AlertProvider";
-ReactDOM.render(
+import { createRoot } from "react-dom/client"
+
+
+const root = document.getElementById("root")
+root && createRoot(root).render(
   <React.StrictMode>
     <LoaderProvider>
       <AlertProvider>
@@ -23,6 +26,5 @@ ReactDOM.render(
         </AuthProvider>
       </AlertProvider>
     </LoaderProvider>
-  </React.StrictMode>,
-  document.getElementById("root")
+  </React.StrictMode>
 );
