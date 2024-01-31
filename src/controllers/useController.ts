@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from "react"
-import { useRequest } from "../api/UseRequest";
 import { useLoader } from "../hooks/useLoader";
 import { arrayIndexer } from "../../../Common/helpers/utils";
-import { useApi, useApiController } from "../../../Common/api/useApi";
+import { useApiController } from "../../../Common/api/useApi";
 import { useAuth } from "../context/AuthContext";
 import useToaster from "../hooks/useToaster";
 
 
-export const useCoontroller = <T>(apiEndpoint: string) => {
+interface IndexedT {
+  id: number;
+}
+export const useCoontroller = <T extends IndexedT>(apiEndpoint: string) => {
   const { showLoader, hideLoader } = useLoader()
   const authContext = useAuth()
   const { get, patch, post, remove } = useApiController(authContext)
@@ -73,7 +75,7 @@ export const useCoontroller = <T>(apiEndpoint: string) => {
       })
   })();
 
-  const findById = (id) => records[index[id]]
+  const findById = <I>(id: number) => records[index[id]]
 
   return { records, loadAll: readAll, save, findById, 
     remove: (record: T) => (async () => {

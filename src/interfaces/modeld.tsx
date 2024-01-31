@@ -34,7 +34,7 @@ export interface IPlantas {
   Id_Lote: number;
 }
 export interface ILote {
-  id?: number;
+  id: number;
   Id_Proyecto: number;
   Codigo_Lote: string;
   Nombre: string;
@@ -60,7 +60,7 @@ export interface IUser {
   user:             number;
 }
 export interface IRol{
-  id?: number;
+  id: number;
   name: string,
   permissions?: number[]
 }

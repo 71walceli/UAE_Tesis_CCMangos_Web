@@ -2,16 +2,13 @@ import React, { useContext, useEffect, useState } from 'react';
 import { BaseLayout } from '../components/BaseLayout';
 import { CustomTable } from '../components/CustomTable';
 import { Endpoints } from '../api/routes';
-import { ILote } from '../interfaces/modeld';
-import { useRequest } from '../api/UseRequest';
+import { ILote } from '../../../Common/interfaces/models';
 import { textFilter, selectFilter } from 'react-bootstrap-table2-filter';
-import { Button, ButtonToolbar, Modal } from 'react-bootstrap';
+import { Modal } from 'react-bootstrap';
 import { GenericForm } from '../components/Form';
 import { AuthContext } from '../context/AuthContext';
-import { useLoader } from '../hooks/useLoader';
 import { CircleIconButton } from '../components/CircleIconButton';
 import { useCoontroller } from '../controllers/useController';
-import useToaster from '../hooks/useToaster';
 
 
 export const Lotes: React.FC = () => {
@@ -45,7 +42,7 @@ export const Lotes: React.FC = () => {
       text: 'Variedad',
       sort: true,
       filter: selectFilter({
-        options: variedades.map(e => e.Variedad).reduce((o, v) => Object.assign(o, {[v]: v}), {})
+        options: variedades.reduce((o, v) => Object.assign(o, {[v]: v}), {})
       }),
     },
   ];
