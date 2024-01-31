@@ -9,6 +9,10 @@ import useToaster from "../hooks/useToaster";
 interface IndexedT {
   id: number;
 }
+interface IController {
+  records: any[],
+  loadAll: () => void,
+}
 export const useCoontroller = <T extends IndexedT>(apiEndpoint: string) => {
   const { showLoader, hideLoader } = useLoader()
   const authContext = useAuth()
