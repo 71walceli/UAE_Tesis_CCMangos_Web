@@ -2,9 +2,10 @@ import React, { useContext } from "react";
 import { CardLogin } from "../components/CardLogin";
 import { useRequest } from "../api/UseRequest";
 import { TokenResponse } from "../interfaces/AuthInterface";
-import { Endpoints } from "../api/routes";
+import { Endpoints } from "../../../Common/api/routes";
 import { useAuth } from "./../context/AuthContext";
 import { AlertContext, AlertType } from "../context/AlertContext";
+
 
 export const Login = () => {
   const { postRequest } = useRequest();

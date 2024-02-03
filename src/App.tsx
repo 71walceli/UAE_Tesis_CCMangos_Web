@@ -9,19 +9,18 @@ import { Login } from "./views/Login";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { PolygonCreator } from "./components/PoligonCreator";
 import { Register } from "./views/Register";
 import { useAuth } from "./context/AuthContext";
 import { Home } from "./views/Home";
 import { Likes } from "./views/Likes";
 import { Lotes } from "./views/Lotes";
+import { Áreas } from "./views/Áreas";
 import { Plantas } from "./views/Plantas";
 import { Sincronizaciones } from "./views/Sincronizaciones";
 import { Usuarios } from "./views/Usuarios";
 import { Estimaciones } from "./views/Estimaciones";
 import { Estadisticas } from "./views/Estadisticas";
-import { Porfile } from "./views/Porfile";
+import { Profile } from "./views/Profile";
 import { Lecturas } from "./views/Lecturas";
 import { Produccion } from "./views/Produccion";
 import { Roles } from "./views/Roles";
@@ -46,13 +45,14 @@ const App: React.FC = () => {
             <>
               <Route path="/" element={<Navigate to="/home" />} />
               <Route path="/home" element={<Home />} />
+              <Route path="/crop/areas" element={<Áreas />} />
               <Route path="/crop/lots" element={<Lotes />} />
               <Route path="/crop/trees" element={<Plantas />} />
               <Route path="/crop/readings" element={<Lecturas/>} />
               <Route path="/crop/production" element={<Produccion/>} />
               <Route path="/weather/sync" element={<Sincronizaciones/>} />
               <Route path="/auth/users" element={<Usuarios/>} />
-              <Route path="/auth/porfile" element={<Porfile/>} />
+              <Route path="/auth/Profile" element={<Profile/>} />
               <Route path="/auth/role" element={<Roles/>} />
               <Route path="/pred/averange" element={<Estimaciones/>} />
               <Route path="/pred/analytics" element={<Estadisticas/>} />
@@ -65,7 +65,6 @@ const App: React.FC = () => {
               <Route path="/auth/register" element={<Register />} />
               <Route path="/uae/likes" element={<Likes/>} />
               <Route path="*" element={<Navigate to="/auth/login" />} />
-              
             </>
           )}
           <Route path="*" element={<p>La ruta no existe</p>} />

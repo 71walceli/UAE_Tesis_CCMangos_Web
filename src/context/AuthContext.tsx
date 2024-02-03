@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { TokenResponse } from "../interfaces/modeld";
+import { TokenResponse } from "../../../Common/interfaces/models";
 
-// Definir la forma del contexto
+
 interface AuthContextProps {
   isAuthenticated: boolean;
   login: (token: TokenResponse) => void;
@@ -9,10 +9,8 @@ interface AuthContextProps {
   UserData: TokenResponse | undefined;
 }
 
-// Crear el contexto de autenticación
 export const AuthContext = createContext({} as AuthContextProps);
 
-// Hook personalizado para acceder al contexto
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

@@ -1,15 +1,9 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { AlertContext } from "../context/AlertContext";
-import { useLoader } from "./../hooks/useLoader";
 import axios, { AxiosError, AxiosResponse } from "axios";
 
-import {
-  ApiErrorResponse,
-  AuthInterface,
-  TokenResponse,
-} from "../interfaces/modeld";
+import { ApiErrorResponse, AuthInterface, TokenResponse, } from "../../../Common/interfaces/models"
 import { useAuth } from "./../context/AuthContext";
-import { Endpoints } from "./routes";
+import { Endpoints } from "../../../Common/api/routes";
+
 
 export const useRequest = () => {
   //#region AxiosConfig

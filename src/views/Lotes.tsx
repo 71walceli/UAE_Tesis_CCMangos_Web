@@ -1,5 +1,5 @@
 import React, {  } from 'react';
-import { Endpoints } from '../api/routes';
+import { Endpoints } from '../../../Common/api/routes';
 import { ILote } from '../../../Common/interfaces/models';
 import { textFilter, selectFilter } from 'react-bootstrap-table2-filter';
 import { useCoontroller } from '../controllers/useController';
@@ -29,11 +29,6 @@ export const Lotes: React.FC = () => {
       filter: textFilter(),
     },
     {
-      dataField: 'Hectareas',
-      text: 'Hectareas',
-      sort: true,
-    },
-    {
       dataField: 'Variedad',
       text: 'Variedad',
       sort: true,
@@ -55,7 +50,8 @@ export const Lotes: React.FC = () => {
     Codigo_Lote: initial?.Codigo_Lote || "",
     Nombre: initial?.Nombre || "",
     Variedad: initial?.Variedad
-    ? { label: initial?.Variedad, value: initial?.Variedad } : { label: "<Seleccionar>", value: "" },
+      ? { label: initial?.Variedad, value: initial?.Variedad } 
+      : { label: "<Seleccionar>", value: "" },
   });
   
   const formManager = useFormManager(reset)

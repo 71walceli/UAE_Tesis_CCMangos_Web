@@ -1,7 +1,7 @@
 import React, { useEffect, useState, ChangeEvent } from 'react';
 import { BaseLayout } from '../components/BaseLayout';
 import { CustomTable } from '../components/CustomTable';
-import { Endpoints } from '../api/routes';
+import { Endpoints } from '../../../Common/api/routes';
 import { useRequest } from '../api/UseRequest';
 import { IRol, IUser } from '../interfaces/AuthInterface';
 import { Modal } from 'react-bootstrap';

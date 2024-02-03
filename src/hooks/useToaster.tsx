@@ -1,13 +1,12 @@
 import { Notification, useToaster as useRsuiteToaster } from "rsuite"
 import React from "react"
+import 'rsuite/dist/rsuite.min.css';
 
 
-const useToaster = (...props) => {
-  const toaster = useRsuiteToaster(props)
+const useToaster = () => {
+  const toaster = useRsuiteToaster()
   return {...toaster, 
-    /* push: (message) => 
-      toaster.push(<Notification>{ message }</Notification>) */
-    notify: (message, type, options) => {
+    notify: (message, type, options?) => {
       const pushOptions = { duration: 13000, placement: "bottomEnd", ...options?.pushOptions || {} }
       const notificationProps = { closable: true, ...options?.notificationProps || {} }
       notificationProps.header = notificationProps.header

@@ -1,16 +1,19 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { BaseLayout } from './BaseLayout';
 import { CustomTable } from './CustomTable';
-import { ILote } from '../interfaces/modeld';
+import { ILote } from '../../../Common/interfaces/models';
 import { Modal } from 'react-bootstrap';
 import { GenericForm } from './Form';
 import { AuthContext } from '../context/AuthContext';
 import { CircleIconButton } from './CircleIconButton';
+import { useLoader } from '../hooks/useLoader';
 
 
 export const RecordsScreen: React.FC = ({controller, columns, formManager, formFields, ...props}) => {
-  const { records, save, findById, remove } = controller
+  const { showLoader } = useLoader()
+  useEffect(() => showLoader(), [])
 
+  const { records, save, findById, remove } = controller
   
   const [ openModal, setOpenModal ] = useState<"form" | "delete" | null>(null);
   
@@ -25,49 +28,47 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
   return (
     <BaseLayout PageName='Lotes'>
       {/* <MapContainer initialCenter={center} polygons={polygons} /> */}
-      {records.length 
-        && <div className="container">
-          <div className="d-flex justify-content-end">
-            <CircleIconButton icon="bi bi-plus" title="Nuevo" onPress={() => setOpenModal("form")}/>
-            <span style={{ width: 15 }} />
-            <CircleIconButton icon="bi bi-pen" title="Editar" color='#ffc' disabled={!selection} 
-              onPress={() => {
-                setFormData(formReset(findById(selection)))
-                setOpenModal("form")
-              }}
-            />
-            <span style={{ width: 15 }} />
-            <CircleIconButton icon="bi bi-trash" title="Eliminar" color='pink' disabled={!selection} 
-              onPress={() => setOpenModal("delete")}
-            />
-          </div>
-          <hr />
-          <div className="row">
-            <CustomTable columns={columns} data={records} 
-              selectRow={{
-                mode: 'radio',
-                clickToSelect: true,
-                selected: selection ? [selection] : [],
-                onSelect: (cell, row) => {
-                  console.log({ cell, row })
-                  setSelection(cell.id)
-                },
-              }} 
-              keyField="id" 
-              defaultSorted={[
-                {
-                  dataField: 'Codigo_Lote',
-                  order: 'asc'
-                },
-                {
-                  dataField: 'Nombre',
-                  order: 'asc'
-                },
-              ]}
-            />
-          </div>
+      <div className="container">
+        <div className="d-flex justify-content-end">
+          <CircleIconButton icon="bi bi-plus" title="Nuevo" onPress={() => setOpenModal("form")}/>
+          <span style={{ width: 15 }} />
+          <CircleIconButton icon="bi bi-pen" title="Editar" color='#ffc' disabled={!selection} 
+            onPress={() => {
+              setFormData(formReset(findById(selection)))
+              setOpenModal("form")
+            }}
+          />
+          <span style={{ width: 15 }} />
+          <CircleIconButton icon="bi bi-trash" title="Eliminar" color='pink' disabled={!selection} 
+            onPress={() => setOpenModal("delete")}
+          />
         </div>
-      }
+        <hr />
+        <div className="row">
+          <CustomTable columns={columns} data={records} 
+            selectRow={{
+              mode: 'radio',
+              clickToSelect: true,
+              selected: selection ? [selection] : [],
+              onSelect: (cell, row) => {
+                console.log({ cell, row })
+                setSelection(cell.id)
+              },
+            }} 
+            keyField="id" 
+            defaultSorted={[
+              {
+                dataField: 'Codigo_Lote',
+                order: 'asc'
+              },
+              {
+                dataField: 'Nombre',
+                order: 'asc'
+              },
+            ]}
+          />
+        </div>
+      </div>
       <Modal show={openModal === "form"} onHide={handleClose} animation 
         onExit={() => {
           setSelection(null)
@@ -105,13 +106,15 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
                 (async () => {
                   const nuevoRegistro: ILote = {
                     ...formData,
-                    Variedad: formData.Variedad.value,
                     Usuario: UserData?.usuario.user || -1,
                   };
+                  Object.entries(nuevoRegistro).forEach(([key, value]) => {
+                    nuevoRegistro[key] = value?.value ? value.value : value
+                  })
 
                   await save(nuevoRegistro)
-                    .then((lotes) => {
-                      console.log({ lotes });
+                    .then((record) => {
+                      console.log({ record });
                       handleClose();
                     })
                     .catch(console.error);
@@ -154,7 +157,6 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
           </div>
         </Modal.Footer>
       </Modal>
-      
     </BaseLayout>
   );
 };

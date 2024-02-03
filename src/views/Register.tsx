@@ -1,9 +1,10 @@
 import React from "react";
 import { CardRegister } from "../components/CardRegister";
 import { useRequest } from "../api/UseRequest";
-import { TokenResponse } from "../interfaces/AuthInterface";
-import { Endpoints } from "../api/routes";
+import { TokenResponse } from "../../../Common/interfaces/models";
+import { Endpoints } from "../../../Common/api/routes";
 import { useAuth } from "./../context/AuthContext";
+
 
 export const Register = () => {
   const { postRequest } = useRequest();

@@ -2,6 +2,9 @@ import React from "react";
 import { Input } from "./InputCustom";
 import { SelectSearch } from "./SelectSearch";
 import Select from 'react-select'
+import { Form } from "react-bootstrap";
+
+
 interface FormField<T> {
   name: string;
   label?: string;
@@ -31,7 +34,7 @@ export const GenericForm = ({ fields, onSubmit, showSubmit = true, accept='*' }:
       <div className="mb-3">
         {fields.map((field) => (
           <div key={field.name}>
-            {field.inputType === "text" || !field.inputType ? ( // Usar "text" por defecto
+            {["text", "password", "number", "email"].includes(field.inputType) || !field.inputType ? ( // Usar "text" por defecto
               <Input
                 {...field}
                 label={field.label}
@@ -49,26 +52,14 @@ export const GenericForm = ({ fields, onSubmit, showSubmit = true, accept='*' }:
                 value={field.value}
                 onChange={field.onChange}
             />
-            
-            ) : field.inputType==='password'?(
-              <Input
+            ) : field.inputType==='checkbox'?(
+              <Form.Check
                 {...field}
                 label={field.label}
-                type={field.inputType}
                 bclass={field.bclass}
                 placeholder={field.placeholder}
-                value={field.value}
-                onChange={field.onChange}
-            />
-            ): field.inputType==='checkbox'?(
-              <Input
-                {...field}
-                label={field.label}
-                type={field.inputType}
-                bclass={field.bclass}
-                placeholder={field.placeholder}
-                value={field.value}
-                onChange={field.onChange}
+                checked={Boolean(field.value)}
+                onChange={() => field.onChange(!field.value)}
             />
             ): field.inputType==='file'?(
               <Input

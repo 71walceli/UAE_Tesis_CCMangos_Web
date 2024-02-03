@@ -1,16 +1,16 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { BaseLayout } from '../components/BaseLayout';
 import { CustomTable } from '../components/CustomTable';
-import { Endpoints } from '../api/routes';
+import { Endpoints } from '../../../Common/api/routes';
 import { useRequest } from '../api/UseRequest';
-import { ILectura } from '../interfaces/AuthInterface';
+import { ILectura } from '../../../Common/interfaces/models';
 import { Modal } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import { GenericForm } from '../components/Form';
 import Download from '../components/Download';
-//import { AlertContext, AlertType } from '../context/AlertContext';
-const columns = [
 
+
+const columns = [
   {
     dataField: 'Victoria',
     text: 'Victoria',
