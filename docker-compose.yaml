@@ -4,7 +4,7 @@ services:
   web-tesis:
     entrypoint: yarn start
     environment:
-      REACT_APP_API: http://django:8080/
+      REACT_APP_API_BASE_URL: http://django:8080/api/
     hostname: web-tesis
     image: node:20
     #restart: unless-stopped

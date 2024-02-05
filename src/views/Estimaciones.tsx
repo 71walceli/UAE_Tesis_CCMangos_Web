@@ -1,13 +1,6 @@
-import React, { useEffect, useState, ChangeEvent } from 'react';
+import React, {  } from 'react';
 import { BaseLayout } from '../components/BaseLayout';
-import { CustomTable } from '../components/CustomTable';
-import { Endpoints } from '../../../Common/api/routes';
-import { useRequest } from '../api/UseRequest';
-import { IPlantas } from '../interfaces/AuthInterface';
-import { Modal, Spinner } from 'react-bootstrap';
-import Button from 'react-bootstrap/Button';
-import { GenericForm } from '../components/Form';
-import { usePlantaState } from '../states/PlantaState';
+import { Spinner } from 'react-bootstrap';
 
 
 export const Estimaciones = () => {

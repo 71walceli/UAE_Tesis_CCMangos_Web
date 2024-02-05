@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { CardLogin } from "../components/CardLogin";
 import { useRequest } from "../api/UseRequest";
-import { TokenResponse } from "../interfaces/AuthInterface";
+import { TokenResponse } from "../../../Common/interfaces/models";
 import { Endpoints } from "../../../Common/api/routes";
 import { useAuth } from "./../context/AuthContext";
 import { AlertContext, AlertType } from "../context/AlertContext";

@@ -3,7 +3,7 @@ import { BaseLayout } from '../components/BaseLayout';
 import { Card, Placeholder } from 'react-bootstrap';
 import { Endpoints } from '../../../Common/api/routes';
 import { useRequest } from '../api/UseRequest';
-import { IUser } from '../interfaces/AuthInterface';
+import { IUser } from '../../../Common/interfaces/models';
 import { AvatarGenerator } from '../components/AvatarGenerator';
 
 

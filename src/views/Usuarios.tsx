@@ -1,6 +1,6 @@
 import React, {  } from 'react';
 import { Endpoints } from '../../../Common/api/routes';
-import { IUser } from '../interfaces/AuthInterface';
+import { IUser } from '../../../Common/interfaces/models';
 import { textFilter, } from "react-bootstrap-table2-filter"
 import { useCoontroller } from '../controllers/useController';
 import { useFormManager } from '../hooks/useFormManager';

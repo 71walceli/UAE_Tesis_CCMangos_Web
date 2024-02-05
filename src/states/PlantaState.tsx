@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { IRol } from '../interfaces/AuthInterface';
+import { IRol } from '../../../Common/interfaces/models';
 export const usePlantaState = () => {
   const [Planta, setPlanta] = useState({
     usuarios: "",

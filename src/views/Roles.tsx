@@ -3,12 +3,14 @@ import { BaseLayout } from '../components/BaseLayout';
 import { CustomTable } from '../components/CustomTable';
 import { Endpoints } from '../../../Common/api/routes';
 import { useRequest } from '../api/UseRequest';
-import { IRol, IUser } from '../interfaces/AuthInterface';
+import { IRol } from '../../../Common/interfaces/models';
 import { Modal } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import { GenericForm } from '../components/Form';
 import { useRolState } from '../states/PlantaState';
 import Download from '../components/Download';
+
+
 const columns = [
   {
     dataField: 'name',
