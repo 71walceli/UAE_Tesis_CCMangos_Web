@@ -27,7 +27,7 @@ export const Áreas: React.FC = () => {
       formatter: (_, row) => findById(row.Id_Lote).Codigo_Lote
     },
     {
-      dataField: 'Codigo_Area',
+      dataField: 'Codigo',
       text: 'Codigo',
       sort: true,
       filter: textFilter(),
@@ -38,11 +38,6 @@ export const Áreas: React.FC = () => {
       sort: true,
       filter: textFilter(),
     },
-    /* {
-      dataField: 'Hectareas',
-      text: 'Hectareas',
-      sort: true,
-    }, */
     {
       dataField: 'Variedad',
       text: 'Variedad',
