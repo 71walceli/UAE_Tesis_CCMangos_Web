@@ -1,23 +1,23 @@
 import React, { useContext } from "react";
 import { CardLogin } from "../components/CardLogin";
-import { useRequest } from "../api/UseRequest";
 import { TokenResponse } from "../../../Common/interfaces/models";
 import { Endpoints } from "../../../Common/api/routes";
 import { useAuth } from "./../context/AuthContext";
 import { AlertContext, AlertType } from "../context/AlertContext";
+import { useApiController } from "../../../Common/api/useApi";
 
 
 export const Login = () => {
-  const { postRequest } = useRequest();
-  const { login } = useAuth();
+  const auth = useAuth();
+  const { login } = auth;
+  const { post } = useApiController(auth);
   const { alerts, addAlert } = useContext(AlertContext);
   const Login = async (username: string, password: string) => {
-   
     if (username === '' || password === '') {
       //alert("Rellene todos los campos""Rellene todos los campos");\
       return addAlert(AlertType.ERROR,"Rellene todos los campos");
     }
-    await postRequest<TokenResponse>(Endpoints.login, {
+    await post<TokenResponse>(Endpoints.login, {
       username,
       password,
     })
