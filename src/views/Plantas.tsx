@@ -1,4 +1,4 @@
-import React, {  } from 'react';
+import React, { useMemo } from 'react';
 import { Endpoints } from '../../../Common/api/routes';
 import { IPlantas } from '../../../Common/interfaces/models';
 import { useCoontroller } from '../controllers/useController';
@@ -8,22 +8,35 @@ import { useFormManager } from '../hooks/useFormManager';
 import { RecordsScreen } from '../components/RecordsScreen';
 
 
-export const Plantas = () => {
-  const { records, findById } = useCoontroller<IArea>(Endpoints.áreas)
+export const Plantas: React.FC = () => {
   const controller = useCoontroller<IPlantas>(Endpoints.Plantas)
+  const { records } = controller
 
+  const { records: allParents } = useCoontroller<IArea>(Endpoints.áreas)
+
+  const parents = useMemo(() => {
+    return records
+      .sort((a1, a2) => a1.Codigo > a2.Codigo ? 1 : -1)
+      .reduce((all, current) => {
+        all[current.Id_Area] = { Codigo: current.Codigo_Area, id: current.Id_Area }
+        return all
+      }, {})
+  }, [records])
+  
   const columns = [
     {
       dataField: 'Id_Area',
       text: 'Área',
       sort: true,
       filter: selectFilter({
-        options: records.reduce((o, v) => Object.assign(o, {[v.id]: v.Codigo_Area}), {})
+        // TODO Definir createSelectFilter
+        options: Object.entries(parents)
+          .reduce((all, [id, a]) => Object.assign(all, {[id]: a.Codigo}), {})
       }),
-      formatter: (_, row) => findById(row.Id_Area)?.Codigo_Area,
+      formatter: (_, row) => parents[row.Id_Area].Codigo,
     },
     {
-      dataField: 'Codigo_Planta',
+      dataField: 'Codigo',
       text: 'Código',
       sort: true,
       filter: textFilter()
@@ -61,11 +74,11 @@ export const Plantas = () => {
     Circonferencia: number;
     VisibleToStudent: boolean;
   }) => {
-    const parent = findById(initial?.Id_Area)
+    const parent = parents[initial?.Id_Area]
     return ({
       ...initial,
       Id_Area: initial?.Id_Area
-        ? { label: parent?.Codigo_Area, value: parent?.id }
+        ? { label: parent?.Codigo, value: parent?.id }
         : { label: "<Seleccionar>", value: null },
       Codigo_Planta: initial?.Codigo_Planta || "",
       Nombre: initial?.Nombre || "",
@@ -85,11 +98,10 @@ export const Plantas = () => {
           bclass: "form-control",
           placeholder: "Indique el lote",
           inputType:"select",
-          options: records
-            .sort((l1, l2) => l1.Codigo_Area > l2.Codigo_Area ? 1 : -1)
-            .map(v => ({
-              label: v.Codigo_Area,
-              value: v.id,
+          options: allParents
+            .map(a => ({
+              label: a.Codigo,
+              value: a.id,
             }))
         },
         {

@@ -1,6 +1,6 @@
-import React, {  } from 'react';
+import React, { useMemo } from 'react';
 import { Endpoints } from '../../../Common/api/routes';
-import { IArea, ILote } from '../../../Common/interfaces/models';
+import { IArea } from '../../../Common/interfaces/models';
 import { textFilter, selectFilter } from 'react-bootstrap-table2-filter';
 import { useCoontroller } from '../controllers/useController';
 import { RecordsScreen } from '../components/RecordsScreen';
@@ -8,9 +8,20 @@ import { useFormManager } from '../hooks/useFormManager';
 
 
 export const Áreas: React.FC = () => {
-  const { records, findById } = useCoontroller<ILote>(Endpoints.lotes)
   const controller = useCoontroller<IArea>(Endpoints.áreas)
-  
+  const { records } = controller
+
+  const { records: allParents } = useCoontroller<IArea>(Endpoints.áreas)
+
+  const parents = useMemo(() => {
+    return records
+      .sort((a1, a2) => a1.Codigo > a2.Codigo ? 1 : -1)
+      .reduce((all, current) => {
+        all[current.Id_Lote] = { Codigo: current.Codigo_Lote, id: current.Id_Lote }
+        return all
+      }, {})
+  }, [records])
+
   const variedades = [
     "Ataulfo",
     "Kent",
@@ -22,9 +33,15 @@ export const Áreas: React.FC = () => {
       text: 'Lote',
       sort: true,
       filter: selectFilter({
-        options: records.reduce((o, v) => Object.assign(o, {[v.id]: v.Codigo_Lote}), {})
+        // TODO Definir createSelectFilter
+        options: Object.entries(parents)
+          .reduce((all, [id, a]) => Object.assign(all, {[id]: a.Codigo}), {})
       }),
-      formatter: (_, row) => findById(row.Id_Lote).Codigo_Lote
+      formatter: (_, row) => {
+        const newLocal = parents[row.Id_Lote];
+        console.log(newLocal)
+        return newLocal.Codigo;
+      },
     },
     {
       dataField: 'Codigo',
@@ -54,11 +71,11 @@ export const Áreas: React.FC = () => {
     Nombre: string;
     Variedad: string;
   }) => {
-    const lote = findById(initial?.Id_Lote)
+    const lote = parents[initial?.Id_Lote]
     return ({
       ...initial,
       Id_Lote: initial?.Id_Lote
-        ? { label: lote?.Codigo_Lote, value: lote?.id }
+        ? { label: lote?.Codigo, value: lote?.id }
         : { label: "<Seleccionar>", value: null },
       Codigo_Area: initial?.Codigo_Area || "",
       Nombre: initial?.Nombre || "",
@@ -71,8 +88,7 @@ export const Áreas: React.FC = () => {
   const formManager = useFormManager(reset)
 
   return (
-    <RecordsScreen columns={columns} controller={controller} 
-      formManager={formManager}
+    <RecordsScreen columns={columns} controller={controller} formManager={formManager}
       formFields={[
         {
           name: "Id_Lote",
@@ -80,10 +96,9 @@ export const Áreas: React.FC = () => {
           bclass: "form-control",
           placeholder: "Indique el lote",
           inputType:"select",
-          options: records
-            .sort((l1, l2) => l1.Codigo_Lote > l2.Codigo_Lote ? 1 : -1)
+          options: allParents
             .map(v => ({
-              label: v.Codigo_Lote,
+              label: v.Codigo,
               value: v.id,
             }))
         },
