@@ -60,6 +60,7 @@ export const Usuarios = () => {
       last_name: initial?.last_name || "",
       email: initial?.email || "",
       username: initial?.username || "",
+      Id_Hacienda: 1, // TODO Permitir elegir hacienda
     });
   };
 
@@ -102,7 +103,7 @@ export const Usuarios = () => {
           name: "password",
           label: "Contraseña",
           bclass: "form-control",
-          type: "password",
+          inputType: "password",
           placeholder: "Escriba el nombre",
         },
         // TODO Agregar mapa
