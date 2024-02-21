@@ -1,6 +1,7 @@
-import { Notification, useToaster as useRsuiteToaster } from "rsuite"
+import Notification from "rsuite/Notification"
+import { useToaster as useRsuiteToaster } from "rsuite"
 import React from "react"
-import 'rsuite/dist/rsuite.min.css';
+import 'rsuite/Notification/styles/index.css';
 
 
 const useToaster = () => {
