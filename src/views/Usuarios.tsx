@@ -67,7 +67,8 @@ export const Usuarios = () => {
   const formManager = useFormManager(reset);
 
   return (
-    <RecordsScreen columns={columns} controller={controller} formManager={formManager}
+    <RecordsScreen pageTitle="Usuarios"
+      columns={columns} controller={controller} formManager={formManager}
       formFields={[
         {
           name: "cedula",

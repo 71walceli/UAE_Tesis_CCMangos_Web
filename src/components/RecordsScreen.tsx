@@ -9,7 +9,7 @@ import { CircleIconButton } from './CircleIconButton';
 import { useLoader } from '../hooks/useLoader';
 
 
-export const RecordsScreen: React.FC = ({controller, columns, formManager, formFields, ...props}) => {
+export const RecordsScreen: React.FC = ({controller, columns, formManager, formFields, pageTitle, ...props}) => {
   const { showLoader } = useLoader()
   useEffect(() => showLoader(), [])
 
@@ -26,7 +26,7 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
   const { data: formData, set: setFormData, reset: formReset, } = formManager
 
   return (
-    <BaseLayout PageName='Lotes'>
+    <BaseLayout PageName={pageTitle}>
       {/* <MapContainer initialCenter={center} polygons={polygons} /> */}
       <div className="container">
         <div className="d-flex justify-content-end">

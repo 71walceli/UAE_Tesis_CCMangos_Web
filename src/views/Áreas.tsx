@@ -88,7 +88,8 @@ export const Áreas: React.FC = () => {
   const formManager = useFormManager(reset)
 
   return (
-    <RecordsScreen columns={columns} controller={controller} formManager={formManager}
+    <RecordsScreen pageTitle="Áreas" columns={columns} controller={controller} 
+      formManager={formManager}
       formFields={[
         {
           name: "Id_Lote",

@@ -90,7 +90,8 @@ export const Plantas: React.FC = () => {
   const formManager = useFormManager(reset);
 
   return (
-    <RecordsScreen columns={columns} controller={controller} formManager={formManager}
+    <RecordsScreen pageTitle="Árboles de Mango"
+      columns={columns} controller={controller} formManager={formManager}
       formFields={[
         {
           name: "Id_Area",

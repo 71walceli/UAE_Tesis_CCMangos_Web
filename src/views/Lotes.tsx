@@ -57,7 +57,7 @@ export const Lotes: React.FC = () => {
   const formManager = useFormManager(reset)
 
   return (
-    <RecordsScreen columns={columns} controller={controller}
+    <RecordsScreen pageTitle="Lotes" columns={columns} controller={controller}
       formManager={formManager}
       formFields={[
         {
