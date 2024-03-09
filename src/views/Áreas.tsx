@@ -11,7 +11,7 @@ export const Áreas: React.FC = () => {
   const controller = useCoontroller<IArea>(Endpoints.áreas)
   const { records } = controller
 
-  const { records: allParents } = useCoontroller<IArea>(Endpoints.áreas)
+  const { records: allParents } = useCoontroller<ILote>(Endpoints.lotes)
 
   const parents = useMemo(() => {
     return records
@@ -88,7 +88,7 @@ export const Áreas: React.FC = () => {
   const formManager = useFormManager(reset)
 
   return (
-    <RecordsScreen pageTitle="Áreas" columns={columns} controller={controller} 
+    <RecordsScreen pageTitle="Lotes" columns={columns} controller={controller} 
       formManager={formManager}
       formFields={[
         {
@@ -99,7 +99,7 @@ export const Áreas: React.FC = () => {
           inputType:"select",
           options: allParents
             .map(v => ({
-              label: v.Codigo,
+              label: `${v.Codigo_Lote} ${v.Nombre}`,
               value: v.id,
             }))
         },

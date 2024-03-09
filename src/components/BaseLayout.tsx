@@ -99,13 +99,13 @@ export const BaseLayout: React.FC<BaseLayoutProps> = (
                   <ListGroup.Item>
                     <Nav.Link href="/crop/lots">
                       <i className="bi bi-map-fill"></i>
-                      &nbsp;&nbsp;Lotes
+                      &nbsp;&nbsp;Áreas
                     </Nav.Link>
                   </ListGroup.Item>
                   <ListGroup.Item>
                     <Nav.Link href="/crop/areas">
                       <i className="bi bi-map-fill"></i>
-                      &nbsp;&nbsp;Áreas
+                      &nbsp;&nbsp;Lotes
                     </Nav.Link>
                   </ListGroup.Item>
                   <ListGroup.Item>
