@@ -37,11 +37,7 @@ export const Áreas: React.FC = () => {
         options: Object.entries(parents)
           .reduce((all, [id, a]) => Object.assign(all, {[id]: a.Codigo}), {})
       }),
-      formatter: (_, row) => {
-        const newLocal = parents[row.Id_Lote];
-        console.log(newLocal)
-        return newLocal.Codigo;
-      },
+      formatter: (_, row) => parents[row.Id_Lote].Codigo,
     },
     {
       dataField: 'Codigo',
