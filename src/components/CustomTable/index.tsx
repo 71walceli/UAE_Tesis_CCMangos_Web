@@ -18,11 +18,16 @@ export const CustomTable = ({ columns, data, ...props }) => {
             { text: '50', value: 50 },
             { text: '100', value: 100 },
           ],
+          showTotal: true,
+          paginationTotalRenderer: (from, to, size) => (
+            <span className="react-bootstrap-table-pagination-total">
+              Del { from } al { to }, en total { size } registros
+            </span>
+          )
         })}
         striped
         hover
-        //condensed
-        //bootstrap4
+        condensed
         noDataIndication={() => 'No hay datos disponibles'} // Mostrar mensaje cuando no hay datos
         exportCSV={true} // Agregar botones para exportar
         csvFileName="datos.csv" // Nombre del archivo CSV
