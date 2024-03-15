@@ -10,6 +10,8 @@ interface InputProps<T extends string | number> {
   onBlur?: () => void;
   onFocus?: () => void;
   accept?: string; // Nueva propiedad para especificar tipos de archivo aceptados
+  disabled: boolean,
+  readonly: boolean,
 }
 
 export function Input<T>({
@@ -22,6 +24,8 @@ export function Input<T>({
   onBlur,
   onFocus,
   accept, // Añade accept a las props
+  disabled,
+  readonly,
 }: InputProps<string | number>) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -38,20 +42,23 @@ export function Input<T>({
     setShowPassword(!showPassword);
   };
 
+  const commonProps = {
+    className: bclass || "",
+    readonly: readonly,
+    disabled,
+    type,
+    placeholder,
+    value: value === undefined ? "" : value,
+    onChange: handleChange,
+    onBlur: onBlur,
+    onFocus: onFocus,
+  }
+
   return (
     <div>
       {type === "checkbox" ? (
         <div style={{ display: "flex", alignItems: "center" }}>
-          <input
-            id="checkbox"
-            className={bclass || ""}
-            type="checkbox"
-            placeholder={placeholder || ""}
-            value={value === undefined ? "" : value}
-            onChange={handleChange}
-            onBlur={onBlur}
-            onFocus={onFocus}
-          />
+          <input {...commonProps} />
           {label && <label style={{ marginLeft: "5px" }} htmlFor="checkbox">{label}</label>}
         </div>
       ) : (
@@ -60,13 +67,8 @@ export function Input<T>({
           {type === "password" ? (
             <div style={{ display: "flex" }}>
               <input
-                className={bclass || ""}
+                {...commonProps}
                 type={showPassword ? "text" : "password"}
-                placeholder={placeholder || ""}
-                value={value === undefined ? "" : value}
-                onChange={handleChange}
-                onBlur={onBlur}
-                onFocus={onFocus}
               />
               <div className="password-toggle" onClick={handleTogglePassword}>
                 {showPassword ? (
@@ -80,9 +82,7 @@ export function Input<T>({
             type === "file" ? (
               // Utiliza la propiedad 'accept' para especificar los tipos de archivo aceptados
               <input
-                className={bclass || ""}
-                type="file"
-                placeholder={placeholder || ""}
+                {...commonProps}
                 accept={accept} // Usa la propiedad 'accept' aquí
                 onChange={(event) => {
                   if (onChange) {
@@ -93,13 +93,7 @@ export function Input<T>({
               />
             ) : (
               <input
-                className={bclass || ""}
-                type={type}
-                placeholder={placeholder || ""}
-                value={value === undefined ? "" : value}
-                onChange={handleChange}
-                onBlur={onBlur}
-                onFocus={onFocus}
+                {...commonProps}
               />
             )
           )}

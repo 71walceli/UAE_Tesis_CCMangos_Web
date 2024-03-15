@@ -9,7 +9,10 @@ import { CircleIconButton } from './CircleIconButton';
 import { useLoader } from '../hooks/useLoader';
 
 
-export const RecordsScreen: React.FC = ({controller, columns, formManager, formFields, pageTitle, ...props}) => {
+export const RecordsScreen: React.FC = ({controller, columns, formManager, formFields, pageTitle, 
+    readonly,
+    ...props
+  }) => {
   const { showLoader } = useLoader()
   useEffect(() => showLoader(), [])
 
@@ -32,16 +35,24 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
         <div className="d-flex justify-content-end">
           <CircleIconButton icon="bi bi-plus" title="Nuevo" onPress={() => setOpenModal("form")}/>
           <span style={{ width: 15 }} />
-          <CircleIconButton icon="bi bi-pen" title="Editar" color='#ffc' disabled={!selection} 
+          <CircleIconButton 
+            icon={readonly ? "bi bi-eye" : "bi bi-pen"}
+            title={readonly ? "Ver" : "Editar"}
+            color='#ffc' disabled={!selection} 
             onPress={() => {
               setFormData(formReset(findById(selection)))
               setOpenModal("form")
             }}
           />
-          <span style={{ width: 15 }} />
-          <CircleIconButton icon="bi bi-trash" title="Eliminar" color='pink' disabled={!selection} 
-            onPress={() => setOpenModal("delete")}
-          />
+          {!readonly 
+            ?<>
+              <span style={{ width: 15 }} />
+              <CircleIconButton icon="bi bi-trash" title="Eliminar" color='pink' disabled={!selection} 
+                onPress={() => setOpenModal("delete")}
+              />
+            </>
+            :null
+          }
         </div>
         <hr />
         <div className="row">
@@ -88,6 +99,7 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
                 ...previous,
                 [field.name]: value,
               })),
+              disabled: readonly,
             }))}
           />
         </Modal.Body>
@@ -99,28 +111,31 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
               onPress={handleClose} 
             />
             <span style={{ width: 15 }} />
-            <CircleIconButton 
-              icon="bi bi-floppy"
-              title="Guardar" 
-              onPress={() => {
-                (async () => {
-                  const nuevoRegistro: ILote = {
-                    ...formData,
-                    Usuario: UserData?.usuario.user || -1,
-                  };
-                  Object.entries(nuevoRegistro).forEach(([key, value]) => {
-                    nuevoRegistro[key] = value?.value ? value.value : value
-                  })
-
-                  await save(nuevoRegistro)
-                    .then((record) => {
-                      console.log({ record });
-                      handleClose();
+            {!readonly 
+              ?<CircleIconButton 
+                icon="bi bi-floppy"
+                title="Guardar" 
+                onPress={() => {
+                  (async () => {
+                    const nuevoRegistro: ILote = {
+                      ...formData,
+                      Usuario: UserData?.usuario.user || -1,
+                    };
+                    Object.entries(nuevoRegistro).forEach(([key, value]) => {
+                      nuevoRegistro[key] = value?.value ? value.value : value
                     })
-                    .catch(console.error);
-                })();
-              }} 
-            />
+
+                    await save(nuevoRegistro)
+                      .then((record) => {
+                        console.log({ record });
+                        handleClose();
+                      })
+                      .catch(console.error);
+                  })();
+                }} 
+              />
+              :null
+            }
           </div>
         </Modal.Footer>
       </Modal>
@@ -148,8 +163,8 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
               icon="bi bi-x"
               title="Sí" 
               onPress={() => remove(findById(selection))
-                .then(lote => {
-                  console.log({ lote });
+                .then(record => {
+                  console.log({ lote: record });
                   handleClose();
                 })
                 .catch(console.error)} 

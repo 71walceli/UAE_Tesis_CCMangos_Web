@@ -7,6 +7,8 @@ import { Form } from "react-bootstrap";
 
 interface FormField<T> {
   name: string;
+  disabled: boolean,
+  readonly: boolean,
   label?: string;
   inputType?: "text" | "select" | "checkbox"| "password"|"file"; // Agregar más tipos si es necesario
   bclass?: string;
@@ -32,52 +34,53 @@ export const GenericForm = ({ fields, onSubmit, showSubmit = true, accept='*' }:
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-3">
-        {fields.map((field) => (
-          <div key={field.name}>
-            {["text", "password", "number", "email"].includes(field.inputType) || !field.inputType ? ( // Usar "text" por defecto
-              <Input
-                {...field}
-                label={field.label}
-                type={field.inputType}
-                bclass={field.bclass}
-                placeholder={field.placeholder}
-                value={field.value}
-                onChange={field.onChange}
-              />
-            ) : field.inputType === "select" && field.options ? (
-              <SelectSearch
-                label={field.label}
-                bclass={field.bclass}
-                options={field.options}
-                value={field.value}
-                onChange={field.onChange}
-            />
-            ) : field.inputType==='checkbox'?(
-              <Form.Check
-                {...field}
-                label={field.label}
-                bclass={field.bclass}
-                placeholder={field.placeholder}
-                checked={Boolean(field.value)}
-                onChange={() => field.onChange(!field.value)}
-            />
-            ): field.inputType==='file'?(
-              <Input
-                {...field}
-                label={field.label}
-                accept={accept}
-                type={field.inputType}
-                bclass={field.bclass}
-                placeholder={field.placeholder}
-                value={field.value}
-                onChange={field.onChange}
-            />
-            ): (
-              // Renderizar otros tipos de entradas aquí
-              <div>Entrada de tipo desconocido</div>
-            )}
-          </div>
-        ))}
+        {fields.map((field) => {
+          const commonProps = {
+            disabled: field.disabled,
+            label: field.label,
+            value: field.value,
+            onChange: field.onChange,
+            placeholder: field.placeholder,
+          }
+
+          return (
+            <div key={field.name}>
+              {["text", "password", "number", "email"].includes(field.inputType) || !field.inputType ? ( // Usar "text" por defecto
+                <Input
+                  {...field}
+                  {...commonProps}
+                  type={field.inputType}
+                  bclass={field.bclass}
+                />
+              ) : field.inputType === "select" && field.options ? (
+                <SelectSearch
+                  {...commonProps}
+                  bclass={field.bclass}
+                  options={field.options}
+                />
+              ) : field.inputType === 'checkbox' ? (
+                <Form.Check
+                  {...field}
+                  {...commonProps}
+                  bclass={field.bclass}
+                  checked={Boolean(field.value)}
+                  onChange={() => field.onChange(!field.value)} 
+                />
+              ) : field.inputType === 'file' ? (
+                <Input
+                  {...field}
+                  {...commonProps}
+                  accept={accept}
+                  type={field.inputType}
+                  bclass={field.bclass}
+                />
+              ) : (
+                // Renderizar otros tipos de entradas aquí
+                <div>Entrada de tipo desconocido</div>
+              )}
+            </div>
+          );
+        })}
       </div>
       <div className="row">
         {showSubmit && (
