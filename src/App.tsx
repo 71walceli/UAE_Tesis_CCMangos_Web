@@ -16,7 +16,7 @@ import { Likes } from "./views/Likes";
 import { Lotes } from "./views/Lotes";
 import { Áreas } from "./views/Áreas";
 import { Plantas } from "./views/Plantas";
-import { Sincronizaciones } from "./views/Sincronizaciones";
+import { Sincronizaciones } from "./views/Clima";
 import { Usuarios } from "./views/Usuarios";
 import { Estimaciones } from "./views/Estimaciones";
 import { Estadisticas } from "./views/Estadisticas";
@@ -24,6 +24,9 @@ import { Profile } from "./views/Profile";
 import { Lecturas } from "./views/Lecturas";
 import { Produccion } from "./views/Produccion";
 import { Roles } from "./views/Roles";
+
+import 'rsuite/dist/rsuite-no-reset.css';
+
 
 const App: React.FC = () => {
   const { isAuthenticated } = useAuth();
