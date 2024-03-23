@@ -131,6 +131,7 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
                     Object.entries(nuevoRegistro).forEach(([key, value]) => {
                       nuevoRegistro[key] = value?.value ? value.value : value
                     })
+                    console.log({nuevoRegistro})
 
                     await save(nuevoRegistro)
                       .then((record) => {
