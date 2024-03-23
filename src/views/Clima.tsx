@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from "react"
-import { BaseLayout } from "../components/BaseLayout"
-import { CustomTable } from "../components/CustomTable"
-import { useRequest } from "../api/UseRequest";
+import React, {  } from "react"
+import { dateFilter, numberFilter, textFilter } from "react-bootstrap-table2-filter"
+import { format } from "date-fns";
+
 import { Endpoints } from "../../../Common/api/routes";
 import { useCoontroller } from "../controllers/useController";
 import { RecordsScreen } from "../components/RecordsScreen";
-import { dateFilter, numberFilter, textFilter } from "react-bootstrap-table2-filter"
 import { useFormManager } from "../hooks/useFormManager";
-import { IProfile, IUser } from "../../../Common/interfaces/models";
-import { format } from "date-fns";
+import { IUser } from "../../../Common/interfaces/models";
+import { CircleIconButton } from "../components/CircleIconButton";
+import { useApiController } from "../../../Common/api/useApi";
+import useToaster from "../hooks/useToaster";
+import { useAuth } from "../context/AuthContext";
 
 
 export const Sincronizaciones = () => {

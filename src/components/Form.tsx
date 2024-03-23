@@ -1,8 +1,8 @@
 import React from "react";
+import { Form, FormControl } from "react-bootstrap";
+
 import { Input } from "./InputCustom";
 import { SelectSearch } from "./SelectSearch";
-import Select from 'react-select'
-import { Form } from "react-bootstrap";
 
 
 interface FormField<T> {
@@ -72,6 +72,14 @@ export const GenericForm = ({ fields, onSubmit, showSubmit = true, accept='*' }:
                   {...commonProps}
                   accept={accept}
                   type={field.inputType}
+                  bclass={field.bclass}
+                />
+              ) : field.inputType === 'date' ? (
+                <FormControl 
+                  type="date"
+                  {...field}
+                  {...commonProps}
+                  onChange={(event) => commonProps.onChange(event.target.value)}
                   bclass={field.bclass}
                 />
               ) : (

@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
+import { Modal } from 'react-bootstrap';
+
 import { BaseLayout } from './BaseLayout';
 import { CustomTable } from './CustomTable';
-import { ILote } from '../../../Common/interfaces/models';
-import { Modal } from 'react-bootstrap';
 import { GenericForm } from './Form';
 import { AuthContext } from '../context/AuthContext';
 import { CircleIconButton } from './CircleIconButton';
