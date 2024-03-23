@@ -15,9 +15,9 @@ import { useAuth } from "../context/AuthContext";
 
 export const Sincronizaciones = () => {
   const controller = useCoontroller(Endpoints.WeatherData)
-
-  const numberFormatter = (number) => number ? Number(number) : null
-  const dateFormatterForField = (date) => date ? format(date, "yyyy-MM-dd HH:mm") : null
+  
+  const numberFormatter = (number: string | number) => number ? Number(number) : null
+  const dateFormatter = (date: Date) => date ? format(date, "yyyy-MM-dd HH:mm") : null
   const reset = (initial: {
     id: number,
     Date: Date,
@@ -47,9 +47,9 @@ export const Sincronizaciones = () => {
     ...initial,
     id: numberFormatter(initial?.id),
 
-    Date: dateFormatterForField(initial?.Date),
-    Date_Sync: dateFormatterForField(initial?.Date_Sync),
-    Date_Arable_Sync: dateFormatterForField(initial?.Date_Arable_Sync),
+    Date: dateFormatter(initial?.Date),
+    Date_Sync: dateFormatter(initial?.Date_Sync),
+    Date_Arable_Sync: dateFormatter(initial?.Date_Arable_Sync),
 
     Device: initial?.Device || "",
     Activo: initial?.Activo || true,
@@ -75,7 +75,7 @@ export const Sincronizaciones = () => {
 
   const {records} = controller
   
-  const dateFormatterForRow = (date) => date ? format(date, "yyyy-MM-dd\n HH:mm") : null
+  const dateFormatterForRow = (date: Date) => date ? format(date, "yyyy-MM-dd\n HH:mm") : null
   const colunms = [
     {
       dataField: "id",
@@ -222,9 +222,26 @@ export const Sincronizaciones = () => {
     },
   ];
 
+  const {get} = useApiController(useAuth())
+  const {notify} = useToaster()
+
   return (
     <RecordsScreen 
       readonly
+      customActions={
+        <CircleIconButton 
+          title="Sincronizar"
+          icon="bi bi-arrow-clockwise"
+          onPress={() => {
+            get(Endpoints.WeatherSync)
+              .then(() => notify("Sincronización correcta", "success"))
+              .catch(error => {
+                notify("Ocurrió un problema al intentar sincronizar", "error")
+                console.error(error)
+              })
+          }}
+        />
+      }
       controller={controller}
       columns={colunms}
       data={records}

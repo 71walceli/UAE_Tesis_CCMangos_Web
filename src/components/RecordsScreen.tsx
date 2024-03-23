@@ -10,7 +10,7 @@ import { useLoader } from '../hooks/useLoader';
 
 
 export const RecordsScreen: React.FC = ({controller, columns, formManager, formFields, pageTitle, 
-    readonly,
+    readonly, customActions,
     ...props
   }) => {
   const { showLoader } = useLoader()
@@ -50,6 +50,13 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
               <CircleIconButton icon="bi bi-trash" title="Eliminar" color='pink' disabled={!selection} 
                 onPress={() => setOpenModal("delete")}
               />
+            </>
+            :null
+          }
+          {customActions 
+            ?<>
+              <span style={{ width: 15 }} />
+              {customActions}
             </>
             :null
           }
@@ -117,7 +124,7 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
                 title="Guardar" 
                 onPress={() => {
                   (async () => {
-                    const nuevoRegistro: ILote = {
+                    const nuevoRegistro = {
                       ...formData,
                       Usuario: UserData?.usuario.user || -1,
                     };
