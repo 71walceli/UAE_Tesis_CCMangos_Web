@@ -10,7 +10,7 @@ import { useLoader } from '../hooks/useLoader';
 
 
 export const RecordsScreen: React.FC = ({controller, columns, formManager, formFields, pageTitle, 
-    readonly, customActions,
+    readonly, customActions, forbidCreate, burbidUpdate, forbidDelete
     ...props
   }) => {
   const { showLoader } = useLoader()
@@ -33,7 +33,10 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
       {/* <MapContainer initialCenter={center} polygons={polygons} /> */}
       <div className="container">
         <div className="d-flex justify-content-end">
-          <CircleIconButton icon="bi bi-plus" title="Nuevo" onPress={() => setOpenModal("form")}/>
+          {!forbidCreate && !readonly 
+            ?<CircleIconButton icon="bi bi-plus" title="Nuevo" onPress={() => setOpenModal("form")}/>
+            :null
+          }
           <span style={{ width: 15 }} />
           <CircleIconButton 
             icon={readonly ? "bi bi-eye" : "bi bi-pen"}

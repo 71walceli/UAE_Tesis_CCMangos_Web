@@ -6,5 +6,10 @@ export const useFormManager = (reset: Object | ((Object?) => {})) => {
 
   // TODO Add validation
 
-  return { data, set, reset }
+  return { data, set, reset, 
+    handleChange: (prop, value) => set(prevData => ({
+      ...prevData,
+      [prop]: value,
+    }))
+  }
 }

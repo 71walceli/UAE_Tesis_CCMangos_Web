@@ -11,13 +11,13 @@ import { CircleIconButton } from "../components/CircleIconButton";
 import { useApiController } from "../../../Common/api/useApi";
 import useToaster from "../hooks/useToaster";
 import { useAuth } from "../context/AuthContext";
+import { dateFormatter } from "../../../Common/helpers/formats";
 
 
 export const Sincronizaciones = () => {
   const controller = useCoontroller(Endpoints.WeatherData)
   
   const numberFormatter = (number: string | number) => number ? Number(number) : null
-  const dateFormatter = (date: Date) => date ? format(date, "yyyy-MM-dd HH:mm") : null
   const reset = (initial: {
     id: number,
     Date: Date,
@@ -75,7 +75,6 @@ export const Sincronizaciones = () => {
 
   const {records} = controller
   
-  const dateFormatterForRow = (date: Date) => date ? format(date, "yyyy-MM-dd\n HH:mm") : null
   const colunms = [
     {
       dataField: "id",
@@ -89,7 +88,7 @@ export const Sincronizaciones = () => {
       text: "Fecha",
       sort: true,
       filter: dateFilter(),
-      formatter: dateFormatterForRow,
+      formatter: dateFormatter,
     },
     {
       dataField: "Temp_Air_Mean",

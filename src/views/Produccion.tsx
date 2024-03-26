@@ -8,6 +8,7 @@ import { IArea } from '../../../Common/interfaces/models';
 import { useFormManager } from '../hooks/useFormManager';
 import { RecordsScreen } from '../components/RecordsScreen';
 import { format } from 'date-fns';
+import { dateFormatter } from '../../../Common/helpers/formats';
 
 
 export const Produccion: React.FC = () => {
@@ -73,8 +74,6 @@ export const Produccion: React.FC = () => {
     },
     // Agrega más columnas según sea necesario
   ];
-  
-  const dateFormatter = (date: Date) => date ? format(date, "yyyy-MM-dd") : null
   
   const reset = (initial?: {
     Id_Area: number;

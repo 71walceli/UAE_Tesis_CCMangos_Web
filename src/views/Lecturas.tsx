@@ -1,164 +1,211 @@
-import React, { ChangeEvent, useEffect, useState } from 'react';
-import { BaseLayout } from '../components/BaseLayout';
-import { CustomTable } from '../components/CustomTable';
+import React, { useMemo } from 'react';
+import { textFilter, selectFilter, dateFilter, numberFilter, multiSelectFilter } from 'react-bootstrap-table2-filter';
+
 import { Endpoints } from '../../../Common/api/routes';
-import { useRequest } from '../api/UseRequest';
-import { ILectura } from '../../../Common/interfaces/models';
-import { Modal } from 'react-bootstrap';
-import Button from 'react-bootstrap/Button';
-import { GenericForm } from '../components/Form';
-import Download from '../components/Download';
+import { IArea } from '../../../Common/interfaces/models';
+import { useCoontroller } from '../controllers/useController';
+import { RecordsScreen } from '../components/RecordsScreen';
+import { useFormManager } from '../hooks/useFormManager';
+import { dateFormatter } from '../../../Common/helpers/formats';
 
 
-const columns = [
-  {
-    dataField: 'FechaVisita',
-    text: 'Fecha',
-  },
-  {
-    dataField: 'E1',
-    text: 'E1',
-  },
-  {
-    dataField: 'E2',
-    text: 'E2',
-  },
-  {
-    dataField: 'E3',
-    text: 'E3',
-  },
-  {
-    dataField: 'E4',
-    text: 'E4',
-  },
-  {
-    dataField: 'E5',
-    text: 'E5',
-  },
-  {
-    dataField: 'GR1',
-    text: 'GR1',
-  },
-  {
-    dataField: 'GR2',
-    text: 'GR2',
-  },
-  {
-    dataField: 'GR3',
-    text: 'GR3',
-  },
-  {
-    dataField: 'GR4',
-    text: 'GR4',
-  },
-  {
-    dataField: 'GR5',
-    text: 'GR5',
-  },
-  {
-    dataField: 'Cherelles',
-    text: 'Cherelles',
-  },
-  {
-    dataField: 'Observacion',
-    text: 'Observacion',
-  },
-  // Agrega más columnas según sea necesario
-];
+export const Lecturas: React.FC = () => {
+  const controller = useCoontroller<IArea>(Endpoints.Lectura)
 
-export const Lecturas = () => {
-  //const
-  const { getRequest, postFileRequest } = useRequest();
-  const [data, setData] = useState<ILectura[]>([]);
-  const [Lectura, setLectura] = useState({
-    Nombre: "",
-    Codigo: "",
-    Id_Lote_id: 0,
-  });
-  const [file, setFile] = useState<File | null>(null)
-  const [show, setShow] = useState(false);
-  //const {  addAlert } = useContext(AlertContext);
-  //functions
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-  const ImporLecturas = () => {
-    const formData = new FormData()
-    formData.append('lecturas', file as any)
+  const { records: _enfermedades } = useCoontroller(Endpoints.enfermedad)
+  const enfermedades = useMemo(() => {
+    return _enfermedades
+      .sort((a1, a2) => a1.Codigo > a2.Codigo ? 1 : -1)
+      .reduce((all, current) => {
+        all[current.id] = { Codigo: current.Codigo, id: current.id }
+        return all
+      }, {})
+  }, [_enfermedades])
 
-    postFileRequest(Endpoints.Lectura+Endpoints.Upload, formData)
-      .then((e) => {
-        console.log(e, formData);
-      })
-      .catch((error) => alert(error.response.data));
-    console.log(JSON.stringify(formData, null, 3))
+  const { records: _plantas } = useCoontroller(Endpoints.Plantas)
+  const plantas = useMemo(() => {
+    return _plantas
+      .sort((a1, a2) => a1.Codigo > a2.Codigo ? 1 : -1)
+      .reduce((all, current) => {
+        all[current.id] = { Codigo: current.Codigo, id: current.id }
+        return all
+      }, {})
+  }, [_plantas])
+
+  const columns = [
+    {
+      dataField: 'Id_Planta',
+      text: 'Planta',
+      sort: true,
+      filter: selectFilter({
+        options: Object.entries(plantas)
+          .reduce((all, [id, a]) => Object.assign(all, {[id]: a.Codigo}), {})
+      }),
+      formatter: (_, row) => plantas[row.Id_Planta]?.Codigo,
+    },
+    {
+      dataField: 'CantidadInflorescencias',
+      text: '# Flores',
+      sort: true,
+      filter: numberFilter(),
+    },
+    {
+      dataField: 'CantidadFrutonIniciales',
+      text: '# Frutos',
+      sort: true,
+      filter: numberFilter(),
+    },
+    {
+      dataField: 'CantidadFrutosMaduración',
+      text: '# Maduros',
+      sort: true,
+      filter: numberFilter(),
+    },
+    {
+      dataField: 'CantidadInflorescenciasPerdidas',
+      text: '# Pérdidas',
+      sort: true,
+      filter: numberFilter(),
+    },
+    {
+      dataField: 'Enfermedades',
+      text: 'Enfermedades',
+      sort: true,
+      filter: multiSelectFilter({
+        options: Object.entries(enfermedades)
+          .reduce((all, [id, a]) => Object.assign(all, {[id]: a.Codigo}), {})
+      }),
+    },
+    {
+      dataField: 'FechaVisita',
+      text: 'Fecha',
+      sort: true,
+      filter: dateFilter(),
+      formatter: (cell) => dateFormatter(cell),
+    },
+  ];
+
+  const reset = (initial?: {
+    Id_Planta: number;
+    CantidadInflorescencias: number;
+    CantidadFrutonIniciales: number;
+    CantidadFrutosMaduración: number;
+    CantidadInflorescenciasPerdidas: number;
+    Enfermedades: number[];
+    Observacion: string;
+    FechaVisita: Date;
+    FechaRegistro: Date;
+    Activo: boolean;
+    Id_Usuario: number;
+    GUIDLectura: string;
+    SyncId: string;
+  }) => {
+    const planta = plantas[initial?.Id_Planta]
+    return ({
+      ...initial,
+      Id_Planta: initial?.Id_Planta
+        ? { label: planta?.Codigo, value: planta?.id }
+        : null,
+      CantidadInflorescencias: initial?.CantidadInflorescencias || "",
+      CantidadFrutonIniciales: initial?.CantidadFrutonIniciales || "",
+      CantidadFrutosMaduración: initial?.CantidadFrutosMaduración || "",
+      CantidadInflorescenciasPerdidas: initial?.CantidadInflorescenciasPerdidas || "",
+      Enfermedades: initial?.Enfermedades || [],
+      Observacion: initial?.Observacion || "",
+      FechaVisita: dateFormatter(initial?.FechaVisita),
+      FechaRegistro: dateFormatter(initial?.FechaRegistro),
+      Activo: initial?.Activo || "",
+      Id_Usuario: initial?.Id_Usuario || "",
+      GUIDLectura: initial?.GUIDLectura || "",
+      SyncId: initial?.SyncId || "",
+    });
   };
-  const SetearFile = (e: ChangeEvent<HTMLInputElement>) => {
-    console.log('archivo xd', e[0])
-    const archivo = e[0]
-    console.log('archivo xd', archivo)
-    if (archivo) {
-      setFile(archivo)
-    }
-  }
-  //call api
-  const GetData = async () => {
-    await getRequest<ILectura[]>(Endpoints.Lectura)
-      .then((e) => {
-        setData(e)
-        console.log(e);
-      })
-      .catch((error) => alert(error));
-  };
-  useEffect(() => {
-    // Realiza una solicitud a la API para obtener los datos
-    GetData();
-  }, []);
+  
+  const formManager = useFormManager(reset)
+
+  const formFields = [
+    {
+      name: "Id_Planta",
+      label: "Planta",
+      bclass: "form-control",
+      placeholder: "Indique el lote",
+      inputType: "select",
+      options: _plantas
+        .map(v => ({
+          label: `Planta ${v.Codigo}`,
+          value: v.id,
+        }))
+    },
+    {
+      name: "CantidadInflorescencias",
+      label: "Cantidad de Inflorescencias",
+      bclass: "form-control",
+      placeholder: "Escriba el código de área",
+      inputType: "number",
+    },
+    {
+      name: "CantidadFrutonIniciales",
+      label: "Cantidad de Frutos Iniciales",
+      bclass: "form-control",
+      placeholder: "Escriba el nombre",
+      inputType: "number",
+    },
+    {
+      name: "CantidadFrutosMaduración",
+      label: "Cantidad de Frutos Maduros",
+      label: "Nombre",
+      bclass: "form-control",
+      placeholder: "Escriba el nombre",
+      inputType: "number",
+    },
+    {
+      name: "CantidadInflorescenciasPerdidas",
+      label: "Cantidad de Pérdidas",
+      bclass: "form-control",
+      placeholder: "Escriba el nombre",
+      inputType: "number",
+    },
+    {
+      name: "Enfermedades",
+      label: "Enfermedades",
+      bclass: "form-control",
+      placeholder: "Escriba el nombre",
+      inputType: "list",
+      multipleChoice: true,
+      options: _enfermedades
+        .map(v => ({
+          label: `${v.Nombre}`,
+          value: v.id,
+        })),
+      value: formManager.data.enfermedades,
+    },
+    {
+      name: "Observacion",
+      label: "Nombre",
+      bclass: "form-control",
+      placeholder: "Escriba el nombre",
+      inputType: "textarea",
+    },
+    {
+      name: "FechaVisita",
+      label: "Nombre",
+      bclass: "form-control",
+      placeholder: "Escriba el nombre",
+      inputType: "date",
+    },
+    {
+      name: "FechaRegistro",
+      label: "Nombre",
+      bclass: "form-control",
+      placeholder: "Escriba el nombre",
+      inputType: "date",
+    },
+  ];
+
   return (
-    <BaseLayout PageName='Lecturas'>
-      <div className='container'>
-        <Button variant="primary" onClick={handleShow}>
-          <i className="bi bi-upload"></i>&nbsp;  Cargar
-        </Button>
-
-        <CustomTable columns={columns} data={data}></CustomTable>
-        
-        <Modal show={show} onHide={handleClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>Importar Lecturas</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <GenericForm
-              showSubmit={false}
-              fields={[
-                {
-                  name: "Lecturas",
-                  label: "Cargar Archivo",
-                  bclass: "form-control",
-                  inputType: "file",
-                  value: Lectura.Id_Lote_id, // Establece el valor de password desde el estado formData
-                  onChange: (value) => {
-
-                    SetearFile(value)
-                    console.log(value)
-                  },
-                }
-              ]}
-              onSubmit={ImporLecturas}
-            />
-          </Modal.Body>
-          <Modal.Footer>
-          <Download fileName="FormatoLecturas.xlsx" Name='Formato de Lecturas'/>
-
-            <Button variant="secondary" onClick={handleClose}>
-              Close
-            </Button>
-            <Button variant="primary" onClick={ImporLecturas}>
-              Save Changes
-            </Button>
-          </Modal.Footer>
-        </Modal>
-      </div>
-
-    </BaseLayout>
-  )
-}
+    <RecordsScreen pageTitle="Lotes" columns={columns} controller={controller} forbidCreate
+      formManager={formManager}
+      formFields={formFields} 
+    />
+  );
+};
