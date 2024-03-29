@@ -10,7 +10,7 @@ import { useLoader } from '../hooks/useLoader';
 
 
 export const RecordsScreen: React.FC = ({controller, columns, formManager, formFields, pageTitle, 
-    readonly, customActions, forbidCreate, burbidUpdate, forbidDelete
+    readonly, customActions, forbidCreate, burbidUpdate, forbidDelete,
     ...props
   }) => {
   const { showLoader } = useLoader()
