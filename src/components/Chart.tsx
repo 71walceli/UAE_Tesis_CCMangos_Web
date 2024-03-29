@@ -1,0 +1,94 @@
+import React, { useEffect, useMemo }  from 'react';
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, BarChart, Bar, Tooltip, ResponsiveContainer, Legend, ScatterChart, Scatter  } from 'recharts';
+import { dateFormatter } from '../../../Common/helpers/formats';
+
+
+const COLORS = [
+  "red",
+  "green",
+  "blue",
+  "pink",
+  "lime",
+  "cyam",
+]
+
+const GRAPH_TYPES = {
+  line: {
+    chartType: LineChart,
+    seriesType: Line,
+  },
+  scatter: {
+    chartType: ScatterChart,
+    seriesType: Scatter,
+  },
+}
+const GRAPH_TYPES_2 = {
+  line: {
+    ChartType: ({children, ...props}) => <LineChart children={children} {...props} />,
+    SeriesType: ({color, dataKey, ...props}) => <Line dataKey={dataKey} {...props} stroke={color} />,
+  },
+  scatter: {
+    ChartType: ({children, ...props}) => <ScatterChart children={children} {...props} />,
+    SeriesType: ({color, dataKey, ...props}) => <Scatter dataKey={dataKey} {...props} color={color} />,
+  },
+}
+const DATA_TYPES = {
+  Date: {
+    tickFormatter: dateFormatter,
+    formatter: dateFormatter,
+    scale: "time",
+  },
+}
+
+export const Chart = ({data, title, type, ...props}) => {
+  useEffect(() => console.log({ data }), [data])
+  const ChartType = GRAPH_TYPES_2[type].ChartType
+  const SeriesType = GRAPH_TYPES_2[type].SeriesType
+  
+  const dataTypes = React.useMemo(() => ({
+    x: DATA_TYPES[data?.[0]?.x.constructor.name],
+    y: DATA_TYPES[data?.[0]?.y.constructor.name],
+  }), [data])
+  useEffect(() => console.log({ dataTypes }), [dataTypes])
+  
+  const series = useMemo(() => {
+    const uniqueSeries = Array.from(new Set([...data.map(r => r.series)]));
+    if (uniqueSeries.length === 0) {
+      return ["y"]
+    }
+    return uniqueSeries;
+  }, [data])
+  useEffect(() => console.log({ series }), [series])
+
+  const renderedData = useMemo(() => data.map(record => ({
+    x: record.x,
+    [record.series]: record.y,
+    series: record.series,
+  })), [data])
+  useEffect(() => console.log({ renderedData }), [renderedData])
+
+  return <div>
+    <h4 className='text-cdnter'>{title}</h4>
+    <ResponsiveContainer width="100%" height={400} {...props}>
+      <ChartType width={600} height={300} data={renderedData}>
+        {series?.map((series, i) => 
+          type === "line" ? <Line dataKey={series} stroke={COLORS[i]} />
+          :type === "scatter" ? <Scatter dataKey={series} color={COLORS[i]} />
+          :null
+        )}
+        <CartesianGrid stroke="#ccc" />
+        <XAxis dataKey="x" { ...dataTypes.x } />
+        <YAxis />
+        {series?.length > 0 ?<Legend /> : null}
+        <Tooltip 
+          formatter={(value, name, props) => {
+            props = {...props}
+            const _value = dataTypes.x.formatter(value);
+            props.x = _value
+            return [_value, name, {...props}];
+          }}
+        />
+      </ChartType>
+    </ResponsiveContainer>
+  </div>;
+}
