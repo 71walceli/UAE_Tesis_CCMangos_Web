@@ -12,24 +12,12 @@ const COLORS = [
   "cyam",
 ]
 
-const GRAPH_TYPES = {
-  line: {
-    chartType: LineChart,
-    seriesType: Line,
-  },
-  scatter: {
-    chartType: ScatterChart,
-    seriesType: Scatter,
-  },
-}
 const GRAPH_TYPES_2 = {
   line: {
     ChartType: ({children, ...props}) => <LineChart children={children} {...props} />,
-    SeriesType: ({color, dataKey, ...props}) => <Line dataKey={dataKey} {...props} stroke={color} />,
   },
   scatter: {
     ChartType: ({children, ...props}) => <ScatterChart children={children} {...props} />,
-    SeriesType: ({color, dataKey, ...props}) => <Scatter dataKey={dataKey} {...props} color={color} />,
   },
 }
 const DATA_TYPES = {

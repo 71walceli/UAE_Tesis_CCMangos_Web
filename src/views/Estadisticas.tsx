@@ -1,15 +1,11 @@
-import React, { useEffect, useMemo }  from 'react';
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, BarChart, Bar, Tooltip  } from 'recharts';
+import React, { useMemo }  from 'react';
 
 import { BaseLayout } from '../components/BaseLayout';
 import { Endpoints } from '../../../Common/api/routes';
 import { useCoontroller } from '../controllers/useController';
 import { IProduccion } from '../../../Common/interfaces/models';
 import { Chart } from '../components/Chart';
-import { numberFormatter } from '../../../Common/helpers/formats';
 
-
-const data = [{ name: 'Ene', uv: 0 }, { name: 'Feb', uv: 501}, { name: 'Page B', uv: 681}];
 
 export const Estadisticas = () => {
   const { records: _producciones } = useCoontroller<IProduccion>(Endpoints.Produccion);
