@@ -30,7 +30,7 @@ export const Áreas: React.FC = () => {
   const columns = [
     {
       dataField: 'Id_Lote',
-      text: 'Lote',
+      text: 'Área',
       sort: true,
       filter: selectFilter({
         // TODO Definir createSelectFilter
@@ -41,7 +41,7 @@ export const Áreas: React.FC = () => {
     },
     {
       dataField: 'Codigo',
-      text: 'Codigo',
+      text: 'Código',
       sort: true,
       filter: textFilter(),
     },
@@ -89,7 +89,7 @@ export const Áreas: React.FC = () => {
       formFields={[
         {
           name: "Id_Lote",
-          label: "Lote",
+          label: "Área",
           bclass: "form-control",
           placeholder: "Indique el lote",
           inputType:"select",

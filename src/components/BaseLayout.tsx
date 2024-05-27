@@ -49,14 +49,14 @@ export const BaseLayout: React.FC<BaseLayoutProps> = (
             </Accordion.Item>
             <Accordion.Item eventKey="1">
               <Accordion.Header>
-                <i className="bi bi-signpost-2"></i> &nbsp;Cultivo
+                <i className="bi bi-signpost-2"></i> &nbsp;Producción
               </Accordion.Header>
               <Accordion.Body>
                 <ListGroup variant="flush">
                   <ListGroup.Item>
                     <Nav.Link href="/crop/production">
                       <i className="bi bi-lightning-charge-fill"></i>
-                      &nbsp;&nbsp;Produccion
+                      &nbsp;&nbsp;Cosechas
                     </Nav.Link>
                   </ListGroup.Item>
                   <ListGroup.Item>
@@ -172,9 +172,9 @@ export const BaseLayout: React.FC<BaseLayoutProps> = (
                   Cerrar sesión
                 </NavDropdown.Item>
               </NavDropdown>
-              <Nav.Link disabled>
+              {/* <Nav.Link disabled>
                 Producción
-              </Nav.Link>
+              </Nav.Link> */}
             </Nav>
           </Navbar.Collapse>
         </div>

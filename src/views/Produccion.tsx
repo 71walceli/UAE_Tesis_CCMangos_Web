@@ -142,7 +142,7 @@ export const Produccion: React.FC = () => {
     },
   ];
   return (
-    <RecordsScreen pageTitle="Registros de producción"
+    <RecordsScreen pageTitle="Cosechas"
       columns={columns} controller={controller} formManager={formManager}
       formFields={formFields}
     />
