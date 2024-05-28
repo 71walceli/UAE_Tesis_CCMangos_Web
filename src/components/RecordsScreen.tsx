@@ -143,7 +143,8 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
                       })
                       .catch(console.error);
                   })();
-                }} 
+                }}
+                disabled={Object.keys(formManager.errors).filter(k => k !== "undefined").length > 0}
               />
               :null
             }

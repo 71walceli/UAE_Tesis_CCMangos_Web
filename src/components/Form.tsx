@@ -23,9 +23,10 @@ interface GenericFormProps {
   showSubmit?: boolean;
   onSubmit: () => void;
   accept?: string;
+  manager?: any;
 }
 
-export const GenericForm = ({ fields, onSubmit, showSubmit = true, accept='*' }: GenericFormProps) => {
+export const GenericForm = ({ fields, onSubmit, showSubmit=true, accept='*', manager}: GenericFormProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit();
@@ -44,7 +45,7 @@ export const GenericForm = ({ fields, onSubmit, showSubmit = true, accept='*' }:
           }
 
           return (
-            <div key={field.name}>
+            <div key={field.name} className="rs-form-group">
               {["text", "password", "number", "email"].includes(field.inputType) || !field.inputType ? ( // Usar "text" por defecto
                 <Input
                   {...field}
@@ -86,6 +87,10 @@ export const GenericForm = ({ fields, onSubmit, showSubmit = true, accept='*' }:
                 // Renderizar otros tipos de entradas aquí
                 <div>Entrada de tipo desconocido</div>
               )}
+              {manager?.errors?.[field.name]
+                ?<div className="form-error invalid-feedback d-block px-2">{manager.errors[field.name]}</div>
+                :null
+              }
             </div>
           );
         })}

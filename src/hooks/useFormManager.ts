@@ -1,12 +1,29 @@
 import { useEffect, useState } from "react"
 
-export const useFormManager = (reset: Object | ((Object?) => {})) => {
+const source = "useFormManager"
+export const useFormManager = (reset: Object | ((Object?) => {}), validator?: Object) => {
   const [data, set] = useState(typeof reset === "function" ? reset() : reset)
-  useEffect(() => console.log({ formData: data }))
+  useEffect(() => console.log({ source: "useFormManager", formData: data }), [data])
+  
+  const [errors, setErrors] = useState({})
+  useEffect(() => {
+    const newErrors = Object.fromEntries(
+      Object.entries(validator).map(([field, criteria]) => {
+        const value = data[field]
+        try {
+          criteria(value)
+          return []
+        } catch (error) {
+          error = error.message
+          return [field, error]
+        }
+      })
+    )
+    setErrors(newErrors)
+    console.log({ source, errors: newErrors })
+  }, [data])
 
-  // TODO Add validation
-
-  return { data, set, reset, 
+  return { data, set, reset, errors, 
     handleChange: (prop, value) => set(prevData => ({
       ...prevData,
       [prop]: value,
