@@ -37,7 +37,6 @@ export const Lotes: React.FC = () => {
       }),
     },
   ];
-
   
   const reset = (initial?: {
     Id_Proyecto: number;
@@ -54,37 +53,57 @@ export const Lotes: React.FC = () => {
       : { label: "<Seleccionar>", value: "" },
   });
   
-  const formManager = useFormManager(reset)
+  const formValidator: Object = {
+    Codigo_Lote: v => {
+      if (v.substring(0,1) !== "A") 
+        throw new Error("Cada área empezar con A.")
+      if (!/^[A-Z0-9]+$/.test(v.substring(1))) 
+        throw new Error("Debe tener una abreviatura en mayúsculas y terminar con un número.")
+      // TODO Check for all codes not to be used
+    },
+    Nombre: v => {
+      if (v.length < 5) 
+        throw new Error("Al menos 5 caracteres")
+      v = v.split(" ")
+      if (v.filter(w => !/^[A-ZÁÉÍÓÚÜa-záéíóúü0-9.-:]{1,20}$/.test(w)).length > 0) 
+        throw new Error("Debe ser uno o más nombres y/o dígitos.")
+    },
+    Variedad: v => {
+      if (!v?.value)
+        throw new Error("Debe seleccionar una variedad");
+    },
+  };
+  const formManager = useFormManager(reset, formValidator)
 
+  const formFields = [
+    {
+      name: "Codigo_Lote",
+      label: "Código",
+      bclass: "form-control",
+      placeholder: "A100",
+    },
+    {
+      name: "Nombre",
+      label: "Nombre",
+      bclass: "form-control",
+      placeholder: "Nombre descriptivo",
+    },
+    {
+      name: "Variedad",
+      label: "Variedad",
+      bclass: "form-control",
+      placeholder: "Seleccionar...",
+      inputType: "select",
+      options: variedades.map(v => ({
+        label: v,
+        value: v,
+      })),
+    },
+  ];
   return (
     <RecordsScreen pageTitle="Áreas" columns={columns} controller={controller}
       formManager={formManager}
-      formFields={[
-        {
-          name: "Codigo_Lote",
-          label: "Código",
-          bclass: "form-control",
-          placeholder: "Ingrese el código",
-        },
-        {
-          name: "Nombre",
-          label: "Nombre",
-          bclass: "form-control",
-          placeholder: "Escriba el nombre del lote",
-        },
-        {
-          name: "Variedad",
-          label: "Variedad",
-          bclass: "form-control",
-          placeholder: "Ingrese el código",
-          inputType:"select",
-          options: variedades.map(v => ({
-            label: v,
-            value: v,
-          })),
-        },
-        // TODO Agregar mapa
-      ]} 
+      formFields={formFields}
     />
   );
 };

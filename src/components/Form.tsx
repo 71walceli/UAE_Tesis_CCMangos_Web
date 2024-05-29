@@ -3,6 +3,7 @@ import { Form, FormControl } from "react-bootstrap";
 
 import { Input } from "./InputCustom";
 import { SelectSearch } from "./SelectSearch";
+import { Message } from "rsuite";
 
 
 interface FormField<T> {
@@ -41,11 +42,14 @@ export const GenericForm = ({ fields, onSubmit, showSubmit=true, accept='*', man
             label: field.label,
             value: field.value,
             onChange: field.onChange,
-            placeholder: field.placeholder,
           }
 
           return (
-            <div key={field.name} className="rs-form-group">
+            <div key={field.name} className="form-group">
+              {field.tips 
+                ?<Message>{field.tips}</Message>
+                :null
+              }
               {["text", "password", "number", "email"].includes(field.inputType) || !field.inputType ? ( // Usar "text" por defecto
                 <Input
                   {...field}
@@ -76,13 +80,16 @@ export const GenericForm = ({ fields, onSubmit, showSubmit=true, accept='*', man
                   bclass={field.bclass}
                 />
               ) : field.inputType === 'date' ? (
-                <FormControl 
+                <Form.Group>
+                  <Form.Label>{field.label}</Form.Label>
+                  <Form.Control 
                   type="date"
                   {...field}
                   {...commonProps}
                   onChange={(event) => commonProps.onChange(event.target.value)}
                   bclass={field.bclass}
                 />
+                </Form.Group>
               ) : (
                 // Renderizar otros tipos de entradas aquí
                 <div>Entrada de tipo desconocido</div>

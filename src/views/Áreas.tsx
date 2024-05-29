@@ -81,49 +81,73 @@ export const Áreas: React.FC = () => {
     });
   };
   
-  const formManager = useFormManager(reset)
+  const formValidator: Object = {
+    Id_Lote: v => {
+      if (!v?.value)
+        throw new Error("Debe seleccionar una variedad");
+    },
+    // TODO Check for all codes not to be used
+    Codigo_Area: v => {
+      if (v.substring(0,1) !== "L") 
+        throw new Error("Cada área empezar con A.")
+      if (!/^[A-Z0-9]+$/.test(v.substring(1))) 
+        throw new Error("Debe tener una abreviatura en mayúsculas y terminar con un número.")
+    },
+    Nombre: v => {
+      if (v.length < 5) 
+        throw new Error("Al menos 5 caracteres")
+      v = v.split(" ")
+      if (v.filter(w => !/^[A-ZÁÉÍÓÚÜa-záéíóúü0-9.-:]{1,20}$/.test(w)).length > 0) 
+        throw new Error("Debe ser uno o más nombres y/o dígitos.")
+    },
+    Variedad: v => {
+      if (!v?.value)
+        throw new Error("Debe seleccionar una variedad");
+    },
+  };
+  const formManager = useFormManager(reset, formValidator)
 
+  const formFields = [
+    {
+      name: "Id_Lote",
+      label: "Área",
+      bclass: "form-control",
+      placeholder: "Indique el lote",
+      inputType: "select",
+      options: allParents
+        .map(v => ({
+          label: `${v.Codigo_Lote} ${v.Nombre}`,
+          value: v.id,
+        }))
+    },
+    {
+      name: "Codigo_Area",
+      label: "Código de área",
+      bclass: "form-control",
+      placeholder: "Escriba el código de área",
+    },
+    {
+      name: "Nombre",
+      label: "Nombre",
+      bclass: "form-control",
+      placeholder: "Escriba el nombre",
+    },
+    {
+      name: "Variedad",
+      label: "Variedad",
+      bclass: "form-control",
+      placeholder: "Ingrese el código",
+      inputType: "select",
+      options: variedades.map(v => ({
+        label: v,
+        value: v,
+      })),
+    },
+  ];
   return (
     <RecordsScreen pageTitle="Lotes" columns={columns} controller={controller} 
       formManager={formManager}
-      formFields={[
-        {
-          name: "Id_Lote",
-          label: "Área",
-          bclass: "form-control",
-          placeholder: "Indique el lote",
-          inputType:"select",
-          options: allParents
-            .map(v => ({
-              label: `${v.Codigo_Lote} ${v.Nombre}`,
-              value: v.id,
-            }))
-        },
-        {
-          name: "Codigo_Area",
-          label: "Código de área",
-          bclass: "form-control",
-          placeholder: "Escriba el código de área",
-        },
-        {
-          name: "Nombre",
-          label: "Nombre",
-          bclass: "form-control",
-          placeholder: "Escriba el nombre",
-        },
-        {
-          name: "Variedad",
-          label: "Variedad",
-          bclass: "form-control",
-          placeholder: "Ingrese el código",
-          inputType:"select",
-          options: variedades.map(v => ({
-            label: v,
-            value: v,
-          })),
-        },
-        // TODO Agregar mapa
-      ]} 
+      formFields={formFields} 
     />
   );
 };

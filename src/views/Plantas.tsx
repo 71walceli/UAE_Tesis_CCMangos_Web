@@ -87,54 +87,52 @@ export const Plantas: React.FC = () => {
     });
   };
 
-  const formManager = useFormManager(reset);
+  const formValidator: Object = {
+    Id_Area: v => {
+      if (!v?.value)
+        throw new Error("Debe seleccionar una variedad");
+    },
+    // TODO Check for all codes not to be used
+    Codigo_Planta: v => {
+      v = v.split(/[^A-Za-z0-9]/)
+      if (!/^P[0-9]+$/.test(v[0])) 
+        throw new Error("Debe tener número de planta.")
+      if (!/^F[0-9]+$/.test(v[1])) 
+        throw new Error("Debe tener número de fila.")
+    },
+  };
+  const formManager = useFormManager(reset, formValidator)
 
+  const formFields = [
+    {
+      name: "Id_Area",
+      label: "Área",
+      bclass: "form-control",
+      placeholder: "Seleccionar...",
+      inputType: "select",
+      options: allParents
+        .map(a => ({
+          label: a.Codigo,
+          value: a.id,
+        }))
+    },
+    {
+      name: "Codigo_Planta",
+      label: "Código de planta",
+      bclass: "form-control",
+      placeholder: "P11 F12",
+    },
+    {
+      name: "Nombre",
+      label: "Nombre",
+      bclass: "form-control",
+      placeholder: "Escriba el nombre",
+    },
+  ];
   return (
     <RecordsScreen pageTitle="Árboles de Mango"
       columns={columns} controller={controller} formManager={formManager}
-      formFields={[
-        {
-          name: "Id_Area",
-          label: "Área",
-          bclass: "form-control",
-          placeholder: "Indique el lote",
-          inputType:"select",
-          options: allParents
-            .map(a => ({
-              label: a.Codigo,
-              value: a.id,
-            }))
-        },
-        {
-          name: "Codigo_Planta",
-          label: "Código de planta",
-          bclass: "form-control",
-          placeholder: "Escriba el código de planta",
-        },
-        {
-          name: "Nombre",
-          label: "Nombre",
-          bclass: "form-control",
-          placeholder: "Escriba el nombre",
-        },
-        {
-          name: "Circunferencia",
-          label: "Circunferencia",
-          bclass: "form-control",
-          placeholder: "Ingrese la circunferencia",
-          inputType:"number",
-          min: 0,
-          max: 20,
-          step: 0.1,
-        },
-        {
-          name: "VisibleToStudent",
-          label: "Visible para estudiantes",
-          bclass: "form-checkbox",
-          inputType:"checkbox",
-        },
-        // TODO Agregar mapa
-      ]}
+      formFields={formFields}
     />
   )
 }

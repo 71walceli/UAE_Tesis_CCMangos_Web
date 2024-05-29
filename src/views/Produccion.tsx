@@ -99,7 +99,29 @@ export const Produccion: React.FC = () => {
     });
   };
 
-  const formManager = useFormManager(reset);
+  const formValidator: Object = {
+    Id_Area: v => {
+      if (!v?.value)
+        throw new Error("Debe seleccionar una variedad");
+    },
+    // TODO Check for all codes not to be used
+    Id_Lote: v => {
+      if (!v?.value)
+        throw new Error("Debe seleccionar una variedad");
+    },
+    // TODO Check for all codes not to be used
+    Cantidad: v => {
+      v = Number(v)
+      if (Number.isNaN(v))
+        throw new Error("Número válido")
+      if (v <= 0)
+        throw new Error("Debe ser un número positivo")
+      // TODO Niveles de producción por hectárea
+      if (v > 1000000)
+        throw new Error("No debe pasar de los niveles de producción normales por hectárea.")
+    },
+  };
+  const formManager = useFormManager(reset, formValidator)
 
   const formFields = [
     {
@@ -118,7 +140,7 @@ export const Produccion: React.FC = () => {
       name: "Id_Area",
       label: "Lote",
       bclass: "form-control",
-      placeholder: "Indique el lote",
+      placeholder: "Seleccionar...",
       inputType: "select",
       options: _areasParents
         .map(a => ({
@@ -130,7 +152,7 @@ export const Produccion: React.FC = () => {
       name: "Cantidad",
       label: "Cantidad cosechada",
       bclass: "form-control",
-      placeholder: "Escriba el código de planta",
+      placeholder: "10000",
       inputType: "number",
     },
     {
