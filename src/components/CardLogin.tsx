@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 import { Card } from "./Card";
 import { GenericForm } from "./Form";
 import logo from './../assets/logo.png';
@@ -55,7 +56,6 @@ export const CardLogin = ({ onLogin }: CardLoginProps) => {
         ]}
         onSubmit={handleLogin}
       />
-      <a href="/auth/register" >Registrase</a>
     </Card>
   );
 };

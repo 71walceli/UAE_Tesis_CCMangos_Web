@@ -33,7 +33,7 @@ export const iconos = {
   albunes: 'albums-outline',
   avion: 'paper-plane-outline',
   arriba: 'chevron-up-outline',
-  basura: 'trash-outline',
+  basura: 'bi bi-trash',
   bolitaLlena: 'radio-button-on-outline',
   bolitaVacia: 'radio-button-off-outline',
   calificacion: 'ribbon-outline',

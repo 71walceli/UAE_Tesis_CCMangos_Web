@@ -1,16 +1,13 @@
-import React, { ReactNode, useContext, useState } from "react";
-import Container from "react-bootstrap/Container";
+import React, { ReactNode, useState } from "react";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import Offcanvas from "react-bootstrap/Offcanvas";
 import Accordion from 'react-bootstrap/Accordion';
 import ListGroup from 'react-bootstrap/ListGroup';
+
 import banner from './../assets/brand.png'
-//Auth
 import { useAuth } from "./../context/AuthContext";
-import { useOutletContext } from "react-router-dom";
-import { AlertContext } from "../context/AlertContext";
 
 
 interface BaseLayoutProps {
@@ -26,8 +23,8 @@ export const BaseLayout: React.FC<BaseLayoutProps> = (
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const handleLinkClick = () => setShow(true);
-  const { alerts } = useContext(AlertContext);
   const { logout, UserData } = useAuth();
+    
   return (
     <>
       {/* TODO On computer size, always display main nav. */}
@@ -37,22 +34,18 @@ export const BaseLayout: React.FC<BaseLayoutProps> = (
         </Offcanvas.Header>
         <Offcanvas.Body>
           <Accordion>
-            <Accordion.Item eventKey="0">
-              <ListGroup variant="flush">
-                <ListGroup.Item>
-                  <Nav.Link href="/weather/sync">
-                    <i className="bi bi-cloud-lightning-rain"></i>
-                    &nbsp; Clima
-                  </Nav.Link>
-                </ListGroup.Item>
-              </ListGroup>
-            </Accordion.Item>
             <Accordion.Item eventKey="1">
               <Accordion.Header>
                 <i className="bi bi-signpost-2"></i> &nbsp;Producción
               </Accordion.Header>
               <Accordion.Body>
                 <ListGroup variant="flush">
+                  <ListGroup.Item>
+                    <Nav.Link href="/weather/sync">
+                      <i className="bi bi-lightning-charge-fill"></i>
+                      &nbsp;&nbsp;Datos edafoclimáticos
+                    </Nav.Link>
+                  </ListGroup.Item>
                   <ListGroup.Item>
                     <Nav.Link href="/crop/production">
                       <i className="bi bi-lightning-charge-fill"></i>
@@ -62,7 +55,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = (
                   <ListGroup.Item>
                     <Nav.Link href="/crop/readings">
                       <i className="bi bi-list-check"></i>
-                      &nbsp;&nbsp;Lecturas
+                      &nbsp;&nbsp;Control de árboles
                     </Nav.Link>
                   </ListGroup.Item>
                 </ListGroup>
@@ -111,7 +104,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = (
                   <ListGroup.Item>
                     <Nav.Link href="/crop/trees">
                       <i className="bi bi-tree-fill"></i>
-                      &nbsp;&nbsp;Plantas
+                      &nbsp;&nbsp;Árboles de Mango
                     </Nav.Link>
                   </ListGroup.Item>
                   <ListGroup.Item>
