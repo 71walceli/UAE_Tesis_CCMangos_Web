@@ -62,6 +62,7 @@ export const GenericForm = ({ fields, onSubmit, showSubmit=true, accept='*', man
                   {...commonProps}
                   bclass={field.bclass}
                   options={field.options}
+                  multiOptions={field.multiple}
                 />
               ) : field.inputType === 'checkbox' ? (
                 <Form.Check
@@ -83,12 +84,12 @@ export const GenericForm = ({ fields, onSubmit, showSubmit=true, accept='*', man
                 <Form.Group>
                   <Form.Label>{field.label}</Form.Label>
                   <Form.Control 
-                  type="date"
-                  {...field}
-                  {...commonProps}
-                  onChange={(event) => commonProps.onChange(event.target.value)}
-                  bclass={field.bclass}
-                />
+                    type="date"
+                    {...field}
+                    {...commonProps}
+                    onChange={(event) => commonProps.onChange(event.target.value)}
+                    bclass={field.bclass}
+                  />
                 </Form.Group>
               ) : (
                 // Renderizar otros tipos de entradas aquí
@@ -105,7 +106,7 @@ export const GenericForm = ({ fields, onSubmit, showSubmit=true, accept='*', man
       <div className="row">
         {showSubmit && (
           <button type="submit" className="btn btn-primary">
-            <i className="bi bi-rocket-takeoff"></i> Enviar
+            <i className="bi bi-rocket-takeoff"></i> Contuniar
           </button>
         )}
       </div>

@@ -56,7 +56,7 @@ export const Lotes: React.FC = () => {
   const formValidator: Object = {
     Codigo_Lote: v => {
       if (v.substring(0,1) !== "A") 
-        throw new Error("Cada área empezar con A.")
+        throw new Error("Cada lote debe empezar con L.")
       if (!/^[A-Z0-9]+$/.test(v.substring(1))) 
         throw new Error("Debe tener una abreviatura en mayúsculas y terminar con un número.")
       // TODO Check for all codes not to be used

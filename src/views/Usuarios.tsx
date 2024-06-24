@@ -1,10 +1,11 @@
 import React, {  } from 'react';
 import { Endpoints } from '../../../Common/api/routes';
 import { IUser } from '../../../Common/interfaces/models';
-import { textFilter, } from "react-bootstrap-table2-filter"
+import { textFilter, selectFilter, } from "react-bootstrap-table2-filter"
 import { useCoontroller } from '../controllers/useController';
 import { useFormManager } from '../hooks/useFormManager';
 import { RecordsScreen } from '../components/RecordsScreen';
+import { ROLES } from '../../../Common/data';
 
 
 export const Usuarios = () => {
@@ -45,23 +46,41 @@ export const Usuarios = () => {
       sort: true,
       filter: textFilter(),
     },
+    {
+      dataField: 'roles',
+      text: 'Roles',
+      sort: true,
+      filter: selectFilter({
+        options: ROLES
+          .reduce((all, {label, value}) => Object.assign(all, {[value]: label}), {}),
+        multiple: true,
+      }),
+      formatter: roles => ROLES.filter(rol => roles.findIndex(e => e === rol.value) > -1)
+        .map(rol => rol.label).join(", ")
+    },
   ];
 
   const reset = (initial?: {
+    id: number;
     cedula: number;
     first_name: string;
     last_name: string;
     email: string;
     username: string;
+    roles: Array<{
+      value: string | number;
+      label: string;
+    }>
   }) => {
     return ({
-      ...initial,
+      id: initial?.id,
       cedula: initial?.cedula || "",
       first_name: initial?.first_name || "",
       last_name: initial?.last_name || "",
       email: initial?.email || "",
       username: initial?.username || "",
       Id_Hacienda: 1, // TODO Permitir elegir hacienda
+      roles: ROLES.filter(rol => initial?.roles?.findIndex(e => e === rol.value) > -1),
     });
   };
 
@@ -102,13 +121,6 @@ export const Usuarios = () => {
     // Comparar el dígito verificador calculado con el dígito verificador proporcionado
     return digitoVerificador === parseInt(cedula.charAt(9));
   }
-  const validadNombrePersona = v => {
-    if (!/^[A-ZÁÉÍÓÚ][a-záéíóúü]{1,20}(?:\s[A-ZÁÉÍÓÚ][a-záéíóúü]{1,20})*$/.test(v)) 
-      throw new Error(
-        "Debe ser uno o más nombresque empiecen con mayúsculam separados por espacio."
-      )
-      // TODO Check for all codes not to be used
-  }
   const validateEmail = (email) => String(email).toLowerCase().match(
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     );
@@ -118,8 +130,20 @@ export const Usuarios = () => {
         throw new Error("Número de cédula inválido");
       }
     },
-    first_name: validadNombrePersona,
-    last_name: validadNombrePersona,
+    first_name: v => {
+      if (!/^[A-ZÁÉÍÓÚ][a-záéíóúü]{1,20}(?:\s[A-ZÁÉÍÓÚ][a-záéíóúü]{1,20})*$/.test(v))
+        throw new Error(
+          "Debe ser uno o más nombres que empiecen con mayúscula separados por espacio."
+        );
+      // TODO Check for all codes not to be used
+    },
+    last_name: v => {
+      if (!/^[A-ZÁÉÍÓÚ][a-záéíóúü]{1,20}(?:\s[A-ZÁÉÍÓÚ][a-záéíóúü]{1,20})*$/.test(v))
+        throw new Error(
+          "Debe ser uno o más apellidos que empiecen con mayúscula separados por espacio."
+        );
+      // TODO Check for all codes not to be used
+    },
     email: v => {
       if (!validateEmail(v))
         throw new Error("No es un email válido");
@@ -128,18 +152,24 @@ export const Usuarios = () => {
       if (!/^[A-Za-z0-9.,]{6,50}$/.test(v))
         throw new Error("Debe ser un nombre de persona.");
     },
-    password: v => {
-      if (v.length < 10)
-        throw new Error("Debe tener al menos 10 caracteres.");
+    password: (v, form) => {
+      if (form.id && (v === "" || !v)) 
+        return
+      if (v?.length < 8)
+        throw new Error("Debe tener al menos 8 caracteres.");
       if (!/[A-Z]+/.test(v))
         throw new Error("Debe tener al menos una letra mayúscula");
       if (!/[a-z]+/.test(v))
         throw new Error("Debe tener al menos una letra minúscula");
       if (!/[0-9]+/.test(v))
         throw new Error("Debe tener al menos un número");
-      if (!/[-!$%^&*()_+|~=`{}\[\]:";'<>?,./]/.test(v))
+      if (!/[^A-Za-z0-9/]/.test(v))
         throw new Error("Debe tener al menos un símbolo");
     },
+    roles: v => {
+      if (v?.length < 1)
+        throw new Error("Debe seleccionar al menos un rol.")
+    }
   };
   const formManager = useFormManager(reset, formValidator);
 
@@ -154,17 +184,17 @@ export const Usuarios = () => {
       name: "first_name",
       label: "Nombre",
       bclass: "form-control",
-      placeholder: "Fulano",
+      placeholder: "",
     },
     {
       name: "last_name",
       label: "Apellido",
       bclass: "form-control",
-      placeholder: "Mengano",
+      placeholder: "",
     },
     {
       name: "email",
-      label: "Dirección de email",
+      label: "Dirección de e-mail",
       bclass: "form-control",
       placeholder: "aeiou@ejemplo.com",
     },
@@ -179,16 +209,29 @@ export const Usuarios = () => {
       label: "Contraseña",
       bclass: "form-control",
       inputType: "password",
-      placeholder: "aA3457.@s",
+      placeholder: formManager.data.id ? "La contraseña actual se mantendrá." : "",
       tips: <>
-        La contraseña ha de tener al menos 10 caracteres, constando de
+        <p>
+          La contraseña ha de tener al menos 10 caracteres, constando de
+        </p>
         <ul>
           <li>Al menos una letra minúscula</li>
           <li>Al menos una letra mayúscula</li>
           <li>Al menos un dígito</li>
           <li>Al menos un carácter especial</li>
         </ul>
+        <p>
+          Ejemplo: <code>aA3457.@s</code>
+        </p>
       </>,
+    },
+    {
+      name: "roles",
+      label: "Roles",
+      inputType: "select",
+      options: ROLES,
+      multiple: true,
+      bclass: "form-control",
     },
   ];
 

@@ -117,14 +117,14 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
           <div className="d-flex justify-content-end">
             <CircleIconButton 
               color='pink'
-              title="Cerrar"  
+              title="Cerrar" 
               onPress={handleClose} 
             />
             <span style={{ width: 15 }} />
             {!readonly 
               ?<CircleIconButton 
                 icon="bi bi-floppy"
-                title="Guardar" 
+                title="Guardar"
                 onPress={() => {
                   (async () => {
                     const nuevoRegistro = {
@@ -132,7 +132,14 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
                       Usuario: UserData?.usuario.user || -1,
                     };
                     Object.entries(nuevoRegistro).forEach(([key, value]) => {
+                      if (nuevoRegistro[key] === undefined) {
+                        delete nuevoRegistro[key]
+                        return
+                      }
                       nuevoRegistro[key] = value?.value ? value.value : value
+                      if (nuevoRegistro[key].constructor.name === "Array") {
+                        nuevoRegistro[key] = nuevoRegistro[key].map(({value}) => value)
+                      }
                     })
                     console.log({nuevoRegistro})
 

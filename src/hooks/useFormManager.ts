@@ -13,7 +13,7 @@ export const useFormManager = (reset: Object | ((Object?) => {}), validator?: Ob
       Object.entries(validator).map(([field, criteria]) => {
         const value = data[field]
         try {
-          criteria(value)
+          criteria(value, data)
           return []
         } catch (error) {
           // TODO Catch specific value error exception

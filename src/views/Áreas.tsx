@@ -89,7 +89,7 @@ export const Áreas: React.FC = () => {
     // TODO Check for all codes not to be used
     Codigo_Area: v => {
       if (v.substring(0,1) !== "L") 
-        throw new Error("Cada área empezar con A.")
+        throw new Error("Cada área debe empezar con A.")
       if (!/^[A-Z0-9]+$/.test(v.substring(1))) 
         throw new Error("Debe tener una abreviatura en mayúsculas y terminar con un número.")
     },

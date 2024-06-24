@@ -12,6 +12,7 @@ interface InputProps<T extends string | number> {
   accept?: string; // Nueva propiedad para especificar tipos de archivo aceptados
   disabled: boolean,
   readonly: boolean,
+  maxlength: number,
 }
 
 export function Input<T>({
@@ -26,6 +27,7 @@ export function Input<T>({
   accept, // Añade accept a las props
   disabled,
   readonly,
+  maxlength,
 }: InputProps<string | number>) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -42,17 +44,21 @@ export function Input<T>({
     setShowPassword(!showPassword);
   };
 
+  const stringProps = {
+    maxlength,
+    placeholder,
+  }
   const commonProps = {
     className: bclass || "",
     readonly: readonly,
     disabled,
     type,
-    placeholder,
     value: value === undefined ? "" : value,
     onChange: handleChange,
     onBlur: onBlur,
     onFocus: onFocus,
   }
+  //console.log({stringProps})
 
   return (
     <div>
@@ -67,6 +73,7 @@ export function Input<T>({
           {type === "password" ? (
             <div style={{ display: "flex" }}>
               <input
+                {...stringProps}
                 {...commonProps}
                 type={showPassword ? "text" : "password"}
               />
@@ -93,6 +100,7 @@ export function Input<T>({
               />
             ) : (
               <input
+                {...stringProps}
                 {...commonProps}
               />
             )

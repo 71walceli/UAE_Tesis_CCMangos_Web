@@ -26,7 +26,7 @@ export const Plantas: React.FC = () => {
   const columns = [
     {
       dataField: 'Id_Area',
-      text: 'Área',
+      text: 'Lote',
       sort: true,
       filter: selectFilter({
         // TODO Definir createSelectFilter
@@ -106,7 +106,7 @@ export const Plantas: React.FC = () => {
   const formFields = [
     {
       name: "Id_Area",
-      label: "Área",
+      label: "Lote",
       bclass: "form-control",
       placeholder: "Seleccionar...",
       inputType: "select",

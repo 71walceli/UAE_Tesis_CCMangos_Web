@@ -12,6 +12,7 @@ import { useApiController } from "../../../Common/api/useApi";
 import useToaster from "../hooks/useToaster";
 import { useAuth } from "../context/AuthContext";
 import { dateFormatter } from "../../../Common/helpers/formats";
+import { colores, iconos } from "../theme/appTheme";
 
 
 export const Sincronizaciones = () => {
@@ -228,25 +229,42 @@ export const Sincronizaciones = () => {
     <RecordsScreen 
       readonly
       customActions={
-        <CircleIconButton 
-          title="Sincronizar"
-          icon="bi bi-arrow-clockwise"
-          onPress={() => {
-            get(Endpoints.WeatherSync)
-              .then(() => notify("Sincronización correcta", "success"))
-              .catch(error => {
-                notify("Ocurrió un problema al intentar sincronizar", "error")
-                console.error(error)
-              })
-          }}
-        />
+        <>
+          {/* <CircleIconButton 
+            title="Sincronizar"
+            icon="bi bi-arrow-clockwise"
+            onPress={() => {
+              get(Endpoints.WeatherSync)
+                .then(() => notify("Sincronización correcta", "success"))
+                .catch(error => {
+                  notify("Ocurrió un problema al intentar sincronizar", "error")
+                  console.error(error)
+                })
+            }}
+          /> */}
+          <CircleIconButton 
+            title="Importar"
+            icon="bi bi-upload"
+            onPress={() => {
+              // TODO
+            }}
+          />
+          <CircleIconButton 
+            title="Eliminar"
+            icon={iconos.basura}
+            color="pink"
+            onPress={() => {
+              // TODO
+            }}
+          />
+        </>
       }
       controller={controller}
       columns={colunms}
       data={records}
       formFields={formFields}
       formManager={formManager}
-      pageTitle="Datos climáticos"
+      pageTitle="Datos edafoclimáticos"
     />
   )
 }
