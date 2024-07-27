@@ -66,8 +66,8 @@ export const Chart = ({data, series, title, type, ...props}) => {
   }, [data])
   useEffect(() => console.log({ renderedData }), [renderedData])
 
-  return <div>
-    <h4 className='text-cdnter'>{title}</h4>
+  return <div className='d-flex flex-column justify-content-center'>
+    <h4 className='text-center w-100'>{title}</h4>
     <ResponsiveContainer height={400} {...props}>
       <ChartType data={renderedData}>
         {dataSeries?.map((series, i) => 
