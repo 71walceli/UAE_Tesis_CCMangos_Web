@@ -32,6 +32,10 @@ const MapContainer: React.FC<MapContainerProps> = ({ google, initialCenter, poly
   );
 };
 
+export const GoogleMap = GoogleApiWrapper({
+  apiKey:  process.env.REACT_APP_GOOGLE_API, // Reemplaza con tu clave de API real
+})(MapContainer)
+
 export default GoogleApiWrapper({
   apiKey:  process.env.REACT_APP_GOOGLE_API, // Reemplaza con tu clave de API real
 })(MapContainer);

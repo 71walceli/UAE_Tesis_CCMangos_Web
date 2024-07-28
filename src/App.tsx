@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
+import { 
   BrowserRouter as Router,
   Route,
   Routes,
@@ -12,7 +12,6 @@ import "./index.css";
 import { Register } from "./views/Register";
 import { useAuth } from "./context/AuthContext";
 import { Home } from "./views/Home";
-import { Likes } from "./views/Likes";
 import { Lotes } from "./views/Lotes";
 import { Áreas } from "./views/Áreas";
 import { Plantas } from "./views/Plantas";
@@ -26,6 +25,8 @@ import { Produccion } from "./views/Produccion";
 import { Roles } from "./views/Roles";
 
 import 'rsuite/dist/rsuite-no-reset.css';
+import { Variedad } from "./views/Variedades";
+import { Enfermedad } from "./views/Enfermedades";
 
 
 const App: React.FC = () => {
@@ -53,6 +54,8 @@ const App: React.FC = () => {
               <Route path="/crop/trees" element={<Plantas />} />
               <Route path="/crop/readings" element={<Lecturas/>} />
               <Route path="/crop/production" element={<Produccion/>} />
+              <Route path="/crop/affection" element={<Enfermedad/>} />
+              <Route path="/crop/variety" element={<Variedad/>} />
               <Route path="/weather/sync" element={<Sincronizaciones/>} />
               <Route path="/auth/users" element={<Usuarios/>} />
               <Route path="/auth/Profile" element={<Profile/>} />
@@ -66,7 +69,6 @@ const App: React.FC = () => {
               <Route path="/" element={<Navigate to="/auth/login" />} />
               <Route path="/auth/login" element={<Login />} />
               <Route path="/auth/register" element={<Register />} />
-              <Route path="/uae/likes" element={<Likes/>} />
               <Route path="*" element={<Navigate to="/auth/login" />} />
             </>
           )}

@@ -14,11 +14,12 @@ interface IController {
   loadAll: () => void,
 }
 export const useCoontroller = <T extends IndexedT>(apiEndpoint: string) => {
+  console.log({source: "useController", apiEndpoint})
   const { showLoader, hideLoader } = useLoader()
   const authContext = useAuth()
   const { get, patch, post, remove } = useApiController(authContext)
   const [ records, setRecords ] = useState<T[]>([])
-  useEffect(() => console.log({ records }), [records])
+  useEffect(() => console.log({ source:"useController", records }), [records])
 
   const index = useMemo(() => arrayIndexer(records), [records])
   useEffect(() => console.log({ index }), [index])
@@ -41,9 +42,9 @@ export const useCoontroller = <T extends IndexedT>(apiEndpoint: string) => {
     })
   useEffect(() => {
     (async () => {
-      showLoader()
+      //showLoader()
       await readAll();
-      hideLoader()
+      //hideLoader()
     })()
   }, []);
 
@@ -81,7 +82,26 @@ export const useCoontroller = <T extends IndexedT>(apiEndpoint: string) => {
 
   const findById = <I>(id: number) => records[index[id]]
 
-  return { records, loadAll: readAll, save, findById, 
+  // TODO 10000 Refactor to use common Code
+  const checkCodeExists = (entity: string, code: string) => get("/misc/verificar_existencia", {
+    entidad: entity, 
+    codigo: code,
+  }).then(({result, objects}) => result)
+
+  const selectOptions = (getLabel) => records
+    .map(v => ({
+      label: getLabel(v),
+      value: v.id,
+    }))
+  
+  const filterOptions = ({getLabel, getKey}) => Object.assign(records
+    .sort((a1, a2) => getKey(a1) > getKey(a2) ? 1 : -1)
+    .reduce((all, current) => {
+      all[current.id] = getLabel(current)
+      return all
+    }, {}))
+  
+  return { records, loadAll: readAll, save, findById, checkCodeExists, selectOptions, filterOptions,
     remove: (record: T) => (async () => {
       console.log({ record })
       showLoader();

@@ -12,14 +12,19 @@ export const LoaderContext = createContext({} as LoaderContextProps);
 
 // Proveedor del contexto de loader
 export const LoaderProvider = ({ children }: any) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [counter, setCounter] = useState(0);
+  const isLoading = counter > 0;
+  
+  // TODO Manejar con contadp, ya qye existen multiples llamadas concurrentes.
 
   const showLoader = () => {
-    setIsLoading(true);
+    // TODO setTimeout(() => { setCounter(v => v + 1); }, 100);
+    setCounter(v => v + 1);
   };
 
   const hideLoader = () => {
-    setIsLoading(false);
+    // TODO setTimeout(() => { setCounter(v => v - 1); }, 100);
+    setCounter(v => v - 1);
   };
 
   return (

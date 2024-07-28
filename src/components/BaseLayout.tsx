@@ -33,90 +33,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = (
           <Offcanvas.Title>Plant Trace</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          <Accordion>
-            <Accordion.Item eventKey="1">
-              <Accordion.Header>
-                <i className="bi bi-signpost-2"></i> &nbsp;Producción
-              </Accordion.Header>
-              <Accordion.Body>
-                <ListGroup variant="flush">
-                  <ListGroup.Item>
-                    <Nav.Link href="/weather/sync">
-                      <i className="bi bi-lightning-charge-fill"></i>
-                      &nbsp;&nbsp;Datos edafoclimáticos
-                    </Nav.Link>
-                  </ListGroup.Item>
-                  <ListGroup.Item>
-                    <Nav.Link href="/crop/production">
-                      <i className="bi bi-lightning-charge-fill"></i>
-                      &nbsp;&nbsp;Cosechas
-                    </Nav.Link>
-                  </ListGroup.Item>
-                  <ListGroup.Item>
-                    <Nav.Link href="/crop/readings">
-                      <i className="bi bi-list-check"></i>
-                      &nbsp;&nbsp;Control de árboles
-                    </Nav.Link>
-                  </ListGroup.Item>
-                </ListGroup>
-              </Accordion.Body>
-            </Accordion.Item>
-            <Accordion.Item eventKey="2">
-              <Accordion.Header>
-                <i className="bi bi-graph-up-arrow"></i>
-                &nbsp;Estimaciones
-              </Accordion.Header>
-              <Accordion.Body>
-                <ListGroup variant="flush">
-                  <ListGroup.Item>
-                    <Nav.Link href="/pred/analytics">
-                      <i className="bi bi-bar-chart-fill"></i>
-                      &nbsp;&nbsp;Estadisticas
-                    </Nav.Link>
-                  </ListGroup.Item>
-                  <ListGroup.Item>
-                    <Nav.Link href="/pred/averange">
-                      <i className="bi bi-graph-up"></i>
-                      &nbsp;&nbsp;Estimaciones
-                    </Nav.Link>
-                  </ListGroup.Item>
-                </ListGroup>
-              </Accordion.Body>
-            </Accordion.Item>
-            <Accordion.Item eventKey="3">
-              <Accordion.Header>
-                <i className="bi bi-person-gear"></i> &nbsp;Configuración
-              </Accordion.Header>
-              <Accordion.Body>
-                <ListGroup variant="flush">
-                  <ListGroup.Item>
-                    <Nav.Link href="/crop/lots">
-                      <i className="bi bi-map-fill"></i>
-                      &nbsp;&nbsp;Áreas
-                    </Nav.Link>
-                  </ListGroup.Item>
-                  <ListGroup.Item>
-                    <Nav.Link href="/crop/areas">
-                      <i className="bi bi-map-fill"></i>
-                      &nbsp;&nbsp;Lotes
-                    </Nav.Link>
-                  </ListGroup.Item>
-                  <ListGroup.Item>
-                    <Nav.Link href="/crop/trees">
-                      <i className="bi bi-tree-fill"></i>
-                      &nbsp;&nbsp;Árboles de Mango
-                    </Nav.Link>
-                  </ListGroup.Item>
-                  <ListGroup.Item>
-                    <Nav.Link href="/auth/users">
-                      <i className="bi bi-people-fill"></i>
-                      &nbsp;&nbsp;Usuarios
-                    </Nav.Link>
-                  </ListGroup.Item>
-                </ListGroup>
-              </Accordion.Body>
-            </Accordion.Item>
-          </Accordion>
+          <SidebarMenu />
         </Offcanvas.Body>
       </Offcanvas>
       <Navbar collapseOnSelect expand="lg" className="bg-body-tertiary">
@@ -175,4 +92,103 @@ export const BaseLayout: React.FC<BaseLayoutProps> = (
       <main>{children}</main>
     </>
   );
+
+  function SidebarMenu() {
+    return <Accordion>
+      <Accordion.Item eventKey="1">
+        <Accordion.Header>
+          <i className="bi bi-signpost-2"></i> &nbsp;Producción
+        </Accordion.Header>
+        <Accordion.Body>
+          <ListGroup variant="flush">
+            <ListGroup.Item>
+              <Nav.Link href="/weather/sync">
+                <i className="bi bi-lightning-charge-fill"></i>
+                &nbsp;&nbsp;Datos edafoclimáticos
+              </Nav.Link>
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <Nav.Link href="/crop/production">
+                <i className="bi bi-lightning-charge-fill"></i>
+                &nbsp;&nbsp;Cosechas
+              </Nav.Link>
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <Nav.Link href="/crop/readings">
+                <i className="bi bi-list-check"></i>
+                &nbsp;&nbsp;Control de árboles
+              </Nav.Link>
+            </ListGroup.Item>
+          </ListGroup>
+        </Accordion.Body>
+      </Accordion.Item>
+      <Accordion.Item eventKey="2">
+        <Accordion.Header>
+          <i className="bi bi-graph-up-arrow"></i>
+          &nbsp;Estimaciones
+        </Accordion.Header>
+        <Accordion.Body>
+          <ListGroup variant="flush">
+            <ListGroup.Item>
+              <Nav.Link href="/pred/analytics">
+                <i className="bi bi-bar-chart-fill"></i>
+                &nbsp;&nbsp;Estadísticas
+              </Nav.Link>
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <Nav.Link href="/pred/averange">
+                <i className="bi bi-graph-up"></i>
+                &nbsp;&nbsp;Estimaciones
+              </Nav.Link>
+            </ListGroup.Item>
+          </ListGroup>
+        </Accordion.Body>
+      </Accordion.Item>
+      <Accordion.Item eventKey="3">
+        <Accordion.Header>
+          <i className="bi bi-person-gear"></i> &nbsp;Configuración
+        </Accordion.Header>
+        <Accordion.Body>
+          <ListGroup variant="flush">
+            <ListGroup.Item>
+              <Nav.Link href="/crop/areas">
+                <i className="bi bi-map-fill"></i>
+                &nbsp;&nbsp;Áreas
+              </Nav.Link>
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <Nav.Link href="/crop/lots">
+                <i className="bi bi-map-fill"></i>
+                &nbsp;&nbsp;Lotes
+              </Nav.Link>
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <Nav.Link href="/crop/trees">
+                <i className="bi bi-tree-fill"></i>
+                &nbsp;&nbsp;Árboles de Mango
+              </Nav.Link>
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <Nav.Link href="/auth/users">
+                <i className="bi bi-people-fill"></i>
+                &nbsp;&nbsp;Usuarios
+              </Nav.Link>
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <Nav.Link href="/crop/affection">
+                <i className="bi bi-virus"></i>
+                &nbsp;&nbsp;Enfermedad
+              </Nav.Link>
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <Nav.Link href="/crop/variety">
+                <i className="bi bi-dna"></i>
+                &nbsp;&nbsp;Variedad
+              </Nav.Link>
+            </ListGroup.Item>
+          </ListGroup>
+        </Accordion.Body>
+      </Accordion.Item>
+    </Accordion>;
+  }
 };
