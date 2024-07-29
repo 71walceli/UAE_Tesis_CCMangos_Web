@@ -29,8 +29,7 @@ export const Áreas: React.FC = () => {
       Poligono: 
         ![undefined, null, ""].includes(initial?.Poligono)
           ?{points: parsePolygon(initial.Poligono), name: initial?.Codigo_Lote || "Esta área"}
-          :null
-        ,
+          :null,
     });
   };
   
@@ -113,7 +112,7 @@ export const Áreas: React.FC = () => {
             points: parsePolygon(r.Poligono),
             color: "gray",
           }))
-      } 
+        } 
       />
     </>}
   />;

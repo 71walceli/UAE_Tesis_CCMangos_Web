@@ -17,7 +17,7 @@
   text-align: left;
 }
 
-.rs-picker-popup {
+.rs-picker-popup, .css-1nmdiq5-menu {
   z-index: 9999 !important;
 }
 

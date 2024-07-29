@@ -1,7 +1,6 @@
 import Notification from "rsuite/Notification"
 import { useToaster as useRsuiteToaster } from "rsuite"
 import React from "react"
-import 'rsuite/Notification/styles/index.css';
 
 
 const useToaster = () => {
