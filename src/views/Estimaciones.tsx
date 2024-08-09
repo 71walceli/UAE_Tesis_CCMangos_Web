@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { Chart } from '../components/Chart';
 import { BaseLayout } from '../components/BaseLayout';
@@ -6,6 +6,9 @@ import { useApiController } from '../../../Common/api/useApi';
 import { useAuth } from '../context/AuthContext';
 import useToaster from '../hooks/useToaster';
 import { Endpoints } from '../../../Common/api/routes';
+import { LoaderContext } from '../context/LoaderContext';
+import { CircleIconButton } from '../components/CircleIconButton';
+import { Modal } from 'react-bootstrap';
 
 
 export const Estimaciones = () => {
@@ -29,21 +32,31 @@ export const Estimaciones = () => {
 
   const translations = {
     Precipitation: "Precipitaciones",
+    Temp_Air: "Temperatura",
     Temp_Air_Mean: "Temperatura",
     Temp_Air_Min: "Temperatura Min.",
     Temp_Air_Max: "Temperatura Máx.",
+    Dew_Temp: "Punto de Rocío",
     Dew_Temp_Mean: "Punto de Rocío",
     Dew_Temp_Max: "Punto de Rocío Min.",
     Dew_Temp_Min: "Punto de Rocío Máx.",
+    Relat_Hum: "Humedad Relativa",
     Relat_Hum_Mean: "Humedad Relativa",
     Relat_Hum_Min: "Humedad Relativa Min.",
     Relat_Hum_Max: "Humedad Relativa Máx.",
-    Wind_Speed_Mean: "Vel. viento",
-    Wind_Speed_Min: "Vel. viento Min.",
-    Wind_Speed_Max: "Vel. viento Máx.",
+    Wind_Speed: "Velocidad del viento",
+    Wind_Speed_Mean: "Velocidad del viento",
+    Wind_Speed_Min: "Velocidad del viento Min.",
+    Wind_Speed_Max: "Velocidad del viento Máx.",
+    Atmospheric_Pressure: "Presión Atmosférica",
     Atmospheric_Pressure_Max: "Presión Atmosférica Min.",
     Atmospheric_Pressure_Min: "Presión Atmosférica Máx.",
   }
+
+  const { showLoader, hideLoader } = useContext(LoaderContext)
+
+  const [ openModal, setOpenModel ] = useState(false)
+  const handleClose = () => setOpenModel(false)
 
   return (
     <BaseLayout PageName='Estimaciones de Producción'>
@@ -59,7 +72,7 @@ export const Estimaciones = () => {
               series={['min', 'value', 'max']}
               data={
                 _variedad.min.map((minValue, index) => ({
-                  x: index,
+                  x: 2023 + index,
                   min: minValue,
                   value: _variedad.value[index],
                   max: _variedad.max[index]
@@ -80,12 +93,9 @@ export const Estimaciones = () => {
           >
             <Chart type="line" 
               series={['min', 'value', 'max']}
-              title={translations[
-                variable
-                  .replace("_Min", "_Mean")
-                  .replace("_Max", "_Mean")
-                || variable
-              ]}
+              title={
+                translations[variable]
+              }
               data={(() => {
                 const data = _variable;
                 // Merge keys from min, value, and max, then deduplicate
@@ -96,7 +106,7 @@ export const Estimaciones = () => {
                 ];
 
                 const formattedData = allDates.map(date => ({
-                  x: date,
+                  x: date.substring(0, 7),
                   min: data.min[date] || null, // Use null or a suitable default value if the date is missing
                   value: data.value[date] || null,
                   max: data.max[date] || null

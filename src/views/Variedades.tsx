@@ -1,8 +1,5 @@
 import React, {  } from 'react';
 import { textFilter, numberFilter } from 'react-bootstrap-table2-filter';
-//import { MapContainer } from 'react-leaflet/MapContainer'
-//import { TileLayer } from 'react-leaflet/TileLayer'
-//import { useMap } from 'react-leaflet/hooks'
 
 import { Endpoints } from '../../../Common/api/routes';
 import { ILote } from '../../../Common/interfaces/models';
@@ -15,6 +12,7 @@ import { FormField } from '../components/Form';
 export const Variedad: React.FC = () => {
   const controller = useCoontroller<ILote>(Endpoints.variedad)
   
+  // TODO Remove code
   const reset = (initial?: {
     Codigo: string;
     Nombre: string;
@@ -33,16 +31,6 @@ export const Variedad: React.FC = () => {
   });
   
   const formValidator: Object = {
-    /* Codigo: async (v, rest) => {
-      if (v.substring(0,1) !== "V") 
-        throw new ValidationError("Cada lote debe empezar con V.")
-      if (!/^[A-Z0-9]+$/.test(v.substring(1))) 
-        throw new ValidationError("Debe tener una abreviatura en mayúsculas y terminar con un número.")
-      // TODO 10000 
-      if (controller.findById(rest.id)?.Codigo !== v && (await controller.checkCodeExists("lote", formManager.data.Codigo))) {
-        throw new ValidationError("Ya existe un área con ese código.")
-      }
-    }, */
     Nombre: v => {
       if (v.length < 5) 
         throw new ValidationError("Al menos 5 caracteres")
@@ -66,14 +54,10 @@ export const Variedad: React.FC = () => {
   };
   const formManager = useFormManager(reset, formValidator)
 
-  const prepareSubmitForm = data => {
-    const newLocal = {
-      ...data,
-      Codigo: `V${data.Nombre.substring(0, 2)}${Math.random().toString(36).substring(2, 4)}`,
-    };
-    console.log({source: "prepareSubmitForm", data, newLocal})
-    return newLocal
-  }
+  const prepareSubmitForm = data => ({
+    ...data,
+    Codigo: `V${data.Nombre.substring(0, 2)}${Math.random().toString(36).substring(2, 4)}`,
+  })
 
   return <RecordsScreen formManager={formManager} controller={controller} 
     prepareSubmitForm={prepareSubmitForm}
@@ -92,12 +76,6 @@ export const Variedad: React.FC = () => {
         filter: textFilter(),
       },
       {
-        text: 'Min. Kg/Ha/Año',
-        dataField: 'MinimaCosechaHectareaAnual',
-        sort: true,
-        filter: numberFilter(),
-      },
-      {
         text: 'Max. Kg/Ha/Año',
         dataField: 'MaximaCosechaHectareaAnual',
         sort: true,
@@ -114,14 +92,9 @@ export const Variedad: React.FC = () => {
         label="Nombre"
         placeholder="Use un nombre descriptivo" />
       <FormField
-        name="MinimaCosechaHectareaAnual"
-        type="number"
-        label="Minima en cosecha anual por Hectarea (kilogramos)"
-        placeholder="Ejemplo: 250" />
-      <FormField
         name="MaximaCosechaHectareaAnual"
         type="number"
-        label="Maxima en cosecha anual por Hectarea (kilogramos)"
+        label="Maxima en cosecha anual por Hectarea (Kg)"
         placeholder="Ejemplo: 100" />
       {/* <DrawMap /> */}
     </>}

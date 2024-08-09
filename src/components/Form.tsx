@@ -1,12 +1,12 @@
-import React from "react";
+import React, { ReactNode, forwardRef } from "react";
 import { Form, FormControl } from "react-bootstrap";
+import { DateRangePicker, Message } from "rsuite";
 
-import { Input } from "./InputCustom";
+import { Input, UploaderInput } from "./InputCustom";
 import { SelectSearch } from "./SelectSearch";
-import { Message } from "rsuite";
 
 
-interface FormField<T> {
+export interface FormFieldProps {
   name: string;
   disabled: boolean,
   readonly: boolean,
@@ -16,18 +16,116 @@ interface FormField<T> {
   placeholder?: string;
   value: T;
   onChange: (value: T) => void;
-  options?: { value: T; label: string }[]; // Opciones para selects
+  options?: { value: T; label: string }[];
+  tips: string | ReactNode | ReactNode[]; 
+  multiple: boolean; 
+  error: string | ReactNode; 
+  accept: string; 
 }
+// Help me wrap this component in ForwardRef
+export const FormField = forwardRef(({
+  name,
+  disabled,
+  readonly,
+  label,
+  inputType,
+  type,
+  bclass,
+  placeholder,
+  value,
+  onChange,
+  options,
+  tips,
+  multiple,
+  error,
+  accept,
+  ...props
+}: FormFieldProps, ref) => {
+  inputType = type || inputType;
+
+  const commonProps = {
+    disabled: disabled,
+    label: label,
+    value: value,
+    onChange: onChange,
+    ref: ref, // Add ref to commonProps so it can be spread into all components
+  };
+
+  return (
+    <div className="form-group">
+      {tips 
+        ? <Message>{tips}</Message>
+        : null
+      }
+      {
+        ["text", "password", "number", "email"].includes(inputType) || !inputType ? (
+          <Input
+            {...props}
+            {...commonProps}
+            type={inputType}
+          />
+        ) : inputType === "select" ? (
+          <SelectSearch
+            {...props}
+            {...commonProps}
+            options={options}
+            multiOptions={multiple}
+          />
+        ) : inputType === 'checkbox' ? (
+          <Form.Check
+            {...props}
+            {...commonProps}
+            checked={Boolean(value)}
+            onChange={() => onChange(!value)} 
+          />
+        ) : inputType === 'file' ? (
+          <UploaderInput
+            {...props}
+            {...commonProps}
+            accept={accept}
+            type={inputType}
+          />
+        ) : inputType === 'date' ? (
+          <Form.Group>
+            <Form.Label>{label}</Form.Label>
+            <Form.Control 
+              type="date"
+              {...props}
+              {...commonProps}
+              onChange={(event) => commonProps.onChange(event.target.value)}
+              bclass={bclass}
+            />
+          </Form.Group>
+        ) : inputType === 'dateRange' ? (
+          <Form.Group>
+            <Form.Label>{label}</Form.Label>
+            <DateRangePicker {...props} {...commonProps} cleanable={false} 
+              style={{ width: "100%" }}
+            />
+          </Form.Group>
+        ) : (
+          <div>Entrada de tipo desconocido</div>
+        )
+      }
+      {error
+        ? <div className="form-error invalid-feedback d-block px-2">{error}</div>
+        : null
+      }
+    </div>
+  );
+})
 
 interface GenericFormProps {
-  fields: FormField<any>[];
+  fields: FormFieldProps[];
+  fields2: ReactNode<FormField>;
   showSubmit?: boolean;
   onSubmit: () => void;
   accept?: string;
   manager?: any;
 }
-
-export const GenericForm = ({ fields, onSubmit, showSubmit=true, accept='*', manager}: GenericFormProps) => {
+export const GenericForm = ({ 
+  fields, onSubmit, showSubmit=true, accept='*', manager
+}: GenericFormProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit();
@@ -36,79 +134,44 @@ export const GenericForm = ({ fields, onSubmit, showSubmit=true, accept='*', man
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-3">
-        {fields.map((field) => {
-          const commonProps = {
-            disabled: field.disabled,
-            label: field.label,
-            value: field.value,
-            onChange: field.onChange,
-          }
-
-          return (
-            <div key={field.name} className="form-group">
-              {field.tips 
-                ?<Message>{field.tips}</Message>
-                :null
-              }
-              {["text", "password", "number", "email"].includes(field.inputType) || !field.inputType ? ( // Usar "text" por defecto
-                <Input
-                  {...field}
-                  {...commonProps}
-                  type={field.inputType}
-                  bclass={field.bclass}
-                />
-              ) : field.inputType === "select" && field.options ? (
-                <SelectSearch
-                  {...commonProps}
-                  bclass={field.bclass}
-                  options={field.options}
-                  multiOptions={field.multiple}
-                />
-              ) : field.inputType === 'checkbox' ? (
-                <Form.Check
-                  {...field}
-                  {...commonProps}
-                  bclass={field.bclass}
-                  checked={Boolean(field.value)}
-                  onChange={() => field.onChange(!field.value)} 
-                />
-              ) : field.inputType === 'file' ? (
-                <Input
-                  {...field}
-                  {...commonProps}
-                  accept={accept}
-                  type={field.inputType}
-                  bclass={field.bclass}
-                />
-              ) : field.inputType === 'date' ? (
-                <Form.Group>
-                  <Form.Label>{field.label}</Form.Label>
-                  <Form.Control 
-                    type="date"
-                    {...field}
-                    {...commonProps}
-                    onChange={(event) => commonProps.onChange(event.target.value)}
-                    bclass={field.bclass}
-                  />
-                </Form.Group>
-              ) : (
-                // Renderizar otros tipos de entradas aquí
-                <div>Entrada de tipo desconocido</div>
-              )}
-              {manager?.errors?.[field.name]
-                ?<div className="form-error invalid-feedback d-block px-2">{manager.errors[field.name]}</div>
-                :null
-              }
-            </div>
-          );
-        })}
+        {fields.map((field) => <FormField {...field} error={manager?.errors?.[field.name]} />)}
       </div>
       <div className="row">
         {showSubmit && (
           <button type="submit" className="btn btn-primary">
-            <i className="bi bi-rocket-takeoff"></i> Contuniar
+            <i className="bi bi-rocket-takeoff" /> Contuniar
           </button>
         )}
+      </div>
+    </form>
+  );
+};
+export const GenericFormReact = ({ 
+  onSubmit, children, manager, disabled, accept='*',
+}: GenericFormProps) => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit();
+  };
+  children = children.length > 1 ? children : [children];
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="mb-3">
+        {children.filter(field => field).map?.(field => { 
+          const Field = field.type
+          console.log({ source: "Form", Field })
+
+          return <Field {...field.props} 
+            disabled={disabled || field.props.disabled}
+            value={manager.data[field.props.name]} 
+            error={manager?.errors?.[field.props.name]}
+            onChange={(value) => manager.set(previous => ({
+              ...previous,
+              [field.props.name]: value,
+            }))}
+          />
+        })}
       </div>
     </form>
   );

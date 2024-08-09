@@ -1,68 +1,43 @@
-import React, { useMemo } from 'react';
-import { selectFilter, numberFilter, dateFilter } from "react-bootstrap-table2-filter"
+import React, { useEffect } from 'react';
+import { selectFilter, numberFilter, dateFilter, textFilter } from "react-bootstrap-table2-filter"
 
 import { Endpoints } from '../../../Common/api/routes';
-import { ILote, IPlantas } from '../../../Common/interfaces/models';
+import { IProduccion, IArea } from '../../../Common/interfaces/models';
 import { useCoontroller } from '../controllers/useController';
-import { IArea } from '../../../Common/interfaces/models';
-import { useFormManager } from '../hooks/useFormManager';
+import { useFormManager, ValidationError } from '../hooks/useFormManager';
 import { RecordsScreen } from '../components/RecordsScreen';
-import { format } from 'date-fns';
 import { dateFormatter } from '../../../Common/helpers/formats';
+import { FormField } from '../components/Form';
+import { getArea, parsePolygon } from '../../../Common/utils/polygons';
 
 
 export const Produccion: React.FC = () => {
-  const controller = useCoontroller<IPlantas>(Endpoints.Produccion)
-  //const { records } = controller
-
-  const { records: _areasParents } = useCoontroller<IArea>(Endpoints.áreas)
-  const areasParents = useMemo(() => {
-    return Object.assign(_areasParents
-      .sort((a1, a2) => a1.Codigo > a2.Codigo ? 1 : -1)
-      .reduce((all, current) => {
-        all[current.id] = { Codigo: current.Codigo_Area, id: current.id }
-        return all
-      }, {}))
-  }, [_areasParents])
+  const controller = useCoontroller<IProduccion>(Endpoints.Produccion)
+  const { 
+    ready: readyLotes,
+    filterOptions: filterLotesOptions,
+    selectOptions: selectLotesOptions,
+    findById: findLoteById,
+  } = useCoontroller<IArea>(Endpoints.áreas)
+  const { 
+    ready: readyVariedades,
+    findById: findVariedadById,
+  } = useCoontroller<IArea>(Endpoints.variedad)
   
-  const { records: _lotesParents } = useCoontroller<ILote>(Endpoints.lotes)
-  const lotesParents = useMemo(() => {
-    return Object.assign(_lotesParents
-      .sort((a1, a2) => a1.Codigo > a2.Codigo ? 1 : -1)
-      .reduce((all, current) => {
-        all[current.id] = { Codigo: current.Codigo_Lote, id: current.id }
-        return all
-      }, {}))
-  }, [_lotesParents])
-
+  const loteKey = "Id_Area"
   const columns = [
     {
-      dataField: 'Id_Lote',
-      text: 'Area',
-      sort: true,
-      filter: selectFilter({
-        // TODO Definir createSelectFilter
-        options: Object.entries(lotesParents)
-          .reduce((all, [id, a]) => Object.assign(all, {[id]: a.Codigo}), {})
-      }),
-      formatter: (_, row) => lotesParents[row.Id_Lote]?.Codigo,
-    },
-    {
-      dataField: 'Id_Area',
+      dataField: loteKey,
       text: 'Lote',
       sort: true,
-      filter: selectFilter({
-        // TODO Definir createSelectFilter
-        options: Object.entries(areasParents)
-          .reduce((all, [id, a]) => Object.assign(all, {[id]: a.Codigo}), {})
-      }),
-      formatter: (_, row) => areasParents[row.Id_Area]?.Codigo,
-    },
-    {
-      dataField: 'Cantidad',
-      text: 'Cantidad',
-      sort: true,
-      filter: numberFilter()
+      filter: selectFilter({ 
+        // TODO Filter out unused codes
+        options: filterLotesOptions({
+          getKey: v => v.Codigo,
+          getLabel: v => v.Codigo,
+        })}
+      ),
+      formatter: (id: number) => findLoteById(id)?.Codigo,
     },
     {
       dataField: 'Fecha',
@@ -72,102 +47,101 @@ export const Produccion: React.FC = () => {
         placeholder: "Buscar por fecha"
       })
     },
-    // Agrega más columnas según sea necesario
+    {
+      dataField: 'Cantidad',
+      text: 'Cantidad (Kg)',
+      sort: true,
+      filter: numberFilter()
+    },
+    {
+      dataField: 'Variedad',
+      text: 'Variedad',
+      sort: true,
+      filter: textFilter(),
+      formatter: variedad => variedad.Nombre,
+    },
   ];
   
   const reset = (initial?: {
-    Id_Area: number;
-    Id_Lote: number;
+    [loteKey]: number;
     Cantidad: number;
     Fecha: Date;
     FechaRegistro: Date;
   }) => {
-    const parentArea = areasParents[initial?.Id_Area]
-    const parentLote = lotesParents[initial?.Id_Lote]
+    const parentLote = initial?.[loteKey] ? findLoteById(initial[loteKey]) : null
     return ({
       ...initial,
-      Id_Area: parentArea?.Codigo
-        ? { label: parentArea?.Codigo, value: parentArea?.id }
-        : undefined,
-      Id_Lote: parentLote?.Codigo
+      [loteKey]: parentLote?.Codigo
         ? { label: parentLote?.Codigo, value: parentLote?.id }
         : undefined,
       Cantidad: initial?.Cantidad || "",
       Fecha: dateFormatter(initial?.Fecha || new Date()),
       FechaRegistro: dateFormatter(initial?.FechaRegistro || new Date()),
       Id_Proyecto: 1,
+      MinimaCosechaHectareaAnual: 0,
     });
   };
 
   const formValidator: Object = {
-    Id_Area: v => {
+    // TODO Check for all codes not to be used
+    [loteKey]: v => {
       if (!v?.value)
-        throw new Error("Debe seleccionar una variedad");
+        throw new ValidationError("Debe seleccionar un lote");
     },
     // TODO Check for all codes not to be used
-    Id_Lote: v => {
-      if (!v?.value)
-        throw new Error("Debe seleccionar una variedad");
-    },
-    // TODO Check for all codes not to be used
-    Cantidad: v => {
+    Cantidad: (v, data) => {
       v = Number(v)
       if (Number.isNaN(v))
-        throw new Error("Número válido")
-      if (v <= 0)
-        throw new Error("Debe ser un número positivo")
+        throw new ValidationError("Número ivválido")
       // TODO Niveles de producción por hectárea
-      if (v > 1000000)
-        throw new Error("No debe pasar de los niveles de producción normales por hectárea.")
+      if (v > data.MaximaCosechaHectareaAnual)
+        throw new ValidationError(`La cantidad máxima permitida es de ${data.MaximaCosechaHectareaAnual} Kg.`)
+      if (v < data.MinimaCosechaHectareaAnual)
+        throw new ValidationError(`La cantidad mínima permitida es de ${data.MinimaCosechaHectareaAnual} Kg.`)
     },
   };
   const formManager = useFormManager(reset, formValidator)
+  useEffect(() => {
+    if (formManager.data[loteKey]) {
+      const lote = findLoteById(formManager.data[loteKey]?.value);
+      const veriedad = findVariedadById(lote?.Variedad);
+      const hectareas = getArea(parsePolygon(lote?.Poligono)) / 10000
+      
+      formManager.set({
+        ...formManager.data,
+        Variedad: veriedad.Nombre,
+        MaximaCosechaHectareaAnual: Number(veriedad.MaximaCosechaHectareaAnual) * hectareas,
+        //MinimaCosechaHectareaAnual: Number(veriedad.MinimaCosechaHectareaAnual) * hectareas,
+      })
+    }
+  }, [formManager.data[loteKey]])
 
-  const formFields = [
-    {
-      name: "Id_Lote",
-      label: "Área",
-      bclass: "form-control",
-      placeholder: "Indique el área",
-      inputType: "select",
-      options: _lotesParents
-        .map(a => ({
-          label: a.Codigo_Lote,
-          value: a.id,
-        }))
-    },
-    {
-      name: "Id_Area",
-      label: "Lote",
-      bclass: "form-control",
-      placeholder: "Seleccionar...",
-      inputType: "select",
-      options: _areasParents
-        .map(a => ({
-          label: a.Codigo,
-          value: a.id,
-        }))
-    },
-    {
-      name: "Cantidad",
-      label: "Cantidad cosechada",
-      bclass: "form-control",
-      placeholder: "10000",
-      inputType: "number",
-    },
-    {
-      name: "Fecha",
-      label: "Fecha",
-      bclass: "form-control",
-      placeholder: "Escriba el código de planta",
-      inputType: "date",
-    },
-  ];
-  return (
-    <RecordsScreen pageTitle="Cosechas"
-      columns={columns} controller={controller} formManager={formManager}
-      formFields={formFields}
-    />
-  )
+  return <RecordsScreen pageTitle="Cosechas" 
+    columns={columns} controller={controller} formManager={formManager} 
+    readiness={[readyLotes, readyVariedades, controller.ready]}
+    formFields__React={<>
+      <FormField
+        name={loteKey}
+        label="Lote"
+        type="select"
+        options={selectLotesOptions(v => `${v.Codigo} ${v.Nombre}`)}
+      />
+      <FormField disabled
+        name="Variedad"
+        label="Variedad del lote"
+        //value={findLoteById(formManager.data[loteKey])?.Variedad?.Nombre}
+      />
+      <FormField
+        type="number"
+        name="Cantidad"
+        label="Cantidad cosechada (Kg)"
+        placeholder='Ejemple: 12500'
+      />
+      <FormField
+        type="date"
+        name="Fecha"
+        label="Fecha de cosecha"
+      />
+    </>}
+  />
 }
-

@@ -1,47 +1,44 @@
-import React, { useMemo } from 'react';
-import { textFilter, selectFilter, dateFilter, numberFilter, multiSelectFilter } from 'react-bootstrap-table2-filter';
+import React, { useEffect, useMemo, useState } from 'react';
+import { selectFilter, dateFilter, numberFilter, multiSelectFilter } from 'react-bootstrap-table2-filter';
 
 import { Endpoints } from '../../../Common/api/routes';
 import { IArea } from '../../../Common/interfaces/models';
 import { useCoontroller } from '../controllers/useController';
 import { RecordsScreen } from '../components/RecordsScreen';
-import { useFormManager } from '../hooks/useFormManager';
+import { useFormManager, ValidationError } from '../hooks/useFormManager';
 import { dateFormatter } from '../../../Common/helpers/formats';
+import { FormField } from '../components/Form';
 
 
 export const Lecturas: React.FC = () => {
+  const { 
+    ready: readyPlantas,
+    findById: findPlantaById,
+    selectOptions: selectPlantaOptions,
+    filterOptions: filterPlantaOptions,
+  } = useCoontroller(Endpoints.Plantas)
+  
+  const { 
+    ready: readyEnfermedades,
+    findById: findEnfermedadById,
+    filterOptions: filterEnfermedadesOptions,
+    selectOptions: selectEnfermedadesOptions,
+  } = useCoontroller(Endpoints.enfermedad)
+
   const controller = useCoontroller<IArea>(Endpoints.Lectura)
-
-  const { records: _enfermedades } = useCoontroller(Endpoints.enfermedad)
-  const enfermedades = useMemo(() => {
-    return _enfermedades
-      .sort((a1, a2) => a1.Codigo > a2.Codigo ? 1 : -1)
-      .reduce((all, current) => {
-        all[current.id] = { Codigo: current.Codigo, id: current.id }
-        return all
-      }, {})
-  }, [_enfermedades])
-
-  const { records: _plantas } = useCoontroller(Endpoints.Plantas)
-  const plantas = useMemo(() => {
-    return _plantas
-      .sort((a1, a2) => a1.Codigo > a2.Codigo ? 1 : -1)
-      .reduce((all, current) => {
-        all[current.id] = { Codigo: current.Codigo, id: current.id }
-        return all
-      }, {})
-  }, [_plantas])
-
+  
   const columns = [
     {
       dataField: 'Id_Planta',
       text: 'Planta',
       sort: true,
       filter: selectFilter({
-        options: Object.entries(plantas)
-          .reduce((all, [id, a]) => Object.assign(all, {[id]: a.Codigo}), {})
+        options: filterPlantaOptions({
+          getLabel: v => v.Codigo,
+          getKey: v => v.id,
+        }),
       }),
-      formatter: (_, row) => plantas[row.Id_Planta]?.Codigo,
+      formatter: v => findPlantaById(v).Codigo,
     },
     {
       dataField: 'CantidadInflorescencias',
@@ -72,9 +69,14 @@ export const Lecturas: React.FC = () => {
       text: 'Enfermedades',
       sort: true,
       filter: multiSelectFilter({
-        options: Object.entries(enfermedades)
-          .reduce((all, [id, a]) => Object.assign(all, {[id]: a.Codigo}), {})
+        options: filterEnfermedadesOptions({
+          getLabel: v => v.Nombre,
+          getKey: v => v.id,
+        }),
       }),
+      formatter: cell => cell
+        .map(v => findEnfermedadById(v).Nombre)
+        .reduce((acc, curr) => acc === null ? [curr] : [...acc, <br />, curr], null),
     },
     {
       dataField: 'FechaVisita',
@@ -100,7 +102,8 @@ export const Lecturas: React.FC = () => {
     GUIDLectura: string;
     SyncId: string;
   }) => {
-    const planta = plantas[initial?.Id_Planta]
+    const planta = findPlantaById(initial?.Id_Planta)
+
     return ({
       ...initial,
       Id_Planta: initial?.Id_Planta
@@ -110,7 +113,9 @@ export const Lecturas: React.FC = () => {
       CantidadFrutonIniciales: initial?.CantidadFrutonIniciales || "",
       CantidadFrutosMaduración: initial?.CantidadFrutosMaduración || "",
       CantidadInflorescenciasPerdidas: initial?.CantidadInflorescenciasPerdidas || "",
-      Enfermedades: initial?.Enfermedades || [],
+      Enfermedades: initial?.Enfermedades
+        ? initial?.Enfermedades.map(id => ({ label: findEnfermedadById(id).Nombre, value: id }))
+        : [],
       Observacion: initial?.Observacion || "",
       FechaVisita: dateFormatter(initial?.FechaVisita),
       FechaRegistro: dateFormatter(initial?.FechaRegistro),
@@ -121,91 +126,103 @@ export const Lecturas: React.FC = () => {
     });
   };
   
-  const formManager = useFormManager(reset)
+  const validateInteger = v => {
+    v = v ? Number(v) : null
+    if (!v || v < 0) {
+      throw new ValidationError("Debe ser número natural.")
+    }
+    if (!Number.isInteger(v)) {
+      throw new ValidationError("Debe ser número natural.")
+    }
+  }
+  const formValidator = {
+    Id_Planta: v => {
+      if (!v) {
+        throw new ValidationError("Debe seleccionar una planta")
+      }
+    },
+    CantidadInflorescencias: v => {
+      v = validateInteger(v)
+    },
+    CantidadFrutonIniciales: v => {
+      v = validateInteger(v)
+    },
+    CantidadFrutosMaduración: v => {
+      v = validateInteger(v)
+    },
+    CantidadInflorescenciasPerdidas: v => {
+      v = validateInteger(v)
+    },
+    fechaVisita: v => {
+      if (!v) {
+        throw new ValidationError("Debe indicar la fecha de la visita")
+      }
+    }
+  }
+  const formManager = useFormManager(reset, formValidator)
 
   const formFields = [
     {
       name: "Id_Planta",
       label: "Planta",
-      bclass: "form-control",
-      placeholder: "Indique el lote",
       inputType: "select",
-      options: _plantas
-        .map(v => ({
-          label: `Planta ${v.Codigo}`,
-          value: v.id,
-        }))
+      options: selectPlantaOptions(v => v.Codigo),
+    },
+    {
+      name: "FechaVisita",
+      label: "Fecha",
+      placeholder: "Escriba el nombre",
+      inputType: "date",
     },
     {
       name: "CantidadInflorescencias",
       label: "Cantidad de Inflorescencias",
-      bclass: "form-control",
-      placeholder: "Escriba el código de área",
+      placeholder: "Ejemplo: 105",
       inputType: "number",
     },
     {
       name: "CantidadFrutonIniciales",
       label: "Cantidad de Frutos Iniciales",
-      bclass: "form-control",
-      placeholder: "Escriba el nombre",
+      placeholder: "Ejemplo: 33",
       inputType: "number",
     },
     {
       name: "CantidadFrutosMaduración",
       label: "Cantidad de Frutos Maduros",
       label: "Nombre",
-      bclass: "form-control",
-      placeholder: "Escriba el nombre",
+      placeholder: "Ejemplo: 24",
       inputType: "number",
     },
     {
       name: "CantidadInflorescenciasPerdidas",
       label: "Cantidad de Pérdidas",
-      bclass: "form-control",
-      placeholder: "Escriba el nombre",
+      placeholder: "Ejemplo: 3",
       inputType: "number",
     },
     {
       name: "Enfermedades",
       label: "Enfermedades",
-      bclass: "form-control",
       placeholder: "Escriba el nombre",
-      inputType: "list",
-      multipleChoice: true,
-      options: _enfermedades
-        .map(v => ({
-          label: `${v.Nombre}`,
-          value: v.id,
-        })),
-      value: formManager.data.enfermedades,
+      inputType: "select",
+      multiple: true,
+      options: selectEnfermedadesOptions(v => v.Nombre),
     },
     {
       name: "Observacion",
-      label: "Nombre",
-      bclass: "form-control",
-      placeholder: "Escriba el nombre",
+      label: "Observación",
+      placeholder: "Ejemplo: Se observa una plaga en la planta",
       inputType: "textarea",
-    },
-    {
-      name: "FechaVisita",
-      label: "Nombre",
-      bclass: "form-control",
-      placeholder: "Escriba el nombre",
-      inputType: "date",
-    },
-    {
-      name: "FechaRegistro",
-      label: "Nombre",
-      bclass: "form-control",
-      placeholder: "Escriba el nombre",
-      inputType: "date",
+      lines: 5,
     },
   ];
 
   return (
-    <RecordsScreen pageTitle="Lotes" columns={columns} controller={controller} forbidCreate
+    <RecordsScreen pageTitle="Controles de árbol" columns={columns} controller={controller} forbidCreate
       formManager={formManager}
-      formFields={formFields} 
+      readiness={[controller.ready, readyEnfermedades, readyPlantas]}
+      formFields__React={<>
+        {formFields.map((props, index) => <FormField key={index} {...props} />)}
+      </>}
     />
   );
 };
