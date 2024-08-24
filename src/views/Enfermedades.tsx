@@ -23,14 +23,6 @@ export const Enfermedad: React.FC = () => {
   });
   
   const formValidator: Object = {
-    Codigo: async v => {
-      if (v.substring(0,1) !== "E") 
-        throw new ValidationError("Cada lote debe empezar con V.")
-      if (!/^[A-Za-z0-9]+$/.test(v.substring(1))) 
-        throw new ValidationError("No debe tener espacios, carecteres especiales ni en minúscula.")
-      if (v.length < 2 || v.length > 6) 
-        throw new ValidationError("Debe estar entre 3 y 5 caracteres.")
-    },
     Nombre: v => {
       if (v.length < 5) 
         throw new ValidationError("Al menos 5 caracteres")
@@ -41,9 +33,14 @@ export const Enfermedad: React.FC = () => {
   };
   const formManager = useFormManager(reset, formValidator)
 
+  const prepareSubmitForm = data => ({
+    ...data,
+    Codigo: `V${data.Nombre.substring(0, 2)}${Math.random().toString(36).substring(2, 4)}`,
+  })
+
 
   return <RecordsScreen formManager={formManager} controller={controller} 
-    pageTitle="Enfermedades" 
+    pageTitle="Enfermedades" prepareSubmitForm={prepareSubmitForm}
     columns={[
       {
         dataField: 'Codigo',
@@ -59,10 +56,6 @@ export const Enfermedad: React.FC = () => {
       },
     ]} 
     formFields__React={<>
-      <FormField
-        name="Codigo"
-        label="Código"
-        placeholder="Ejemplo: Eab1" />
       <FormField
         name="Nombre"
         label="Nombre"
