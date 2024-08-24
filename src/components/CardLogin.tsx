@@ -1,61 +1,54 @@
 import React, { useState } from "react";
 
 import { Card } from "./Card";
-import { GenericForm } from "./Form";
-import logo from './../assets/logo.png';
+import { FormField, GenericForm, GenericFormReact } from "./Form";
+import Isotipo from './../assets/Isologo.png';
+import { useFormManager } from "../hooks/useFormManager";
+import { CircleIconButton } from "./CircleIconButton";
+
 
 interface CardLoginProps {
   onLogin: (username: string, password: string) => void;
 }
 
 export const CardLogin = ({ onLogin }: CardLoginProps) => {
-  const [formData, setFormData] = useState({
+  const handleLogin = e => {
+    e.preventDefault();
+    onLogin(manager.data.username, manager.data.password);
+  };
+
+
+  const formFields = [
+    {
+      name: "username",
+      label: "Nombre de Usuario",
+      placeholder: "Nombre de usuario",
+    },
+    {
+      name: "password",
+      label: "Contraseña",
+      placeholder: "Contraseña",
+      inputType: "password",
+    },
+    {
+      name: "remember",
+      inputType: "checkbox",
+      label: "Recordarme?",
+    },
+  ];
+  const manager = useFormManager(() => ({
     username: "",
     password: "",
-  });
+    remember: true,
+  }))
 
-  const handleLogin = () => {
-    // Realiza alguna lógica de autenticación aquí
-    onLogin(formData.username, formData.password);
-  };
-  const handleInputChange = (name: string, value: string) => {
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
   return (
-    <Card title="Iniciar Sesión" footer={null} image={logo} w={"20rem"}>
-      <GenericForm
-        fields={[
-          {
-            name: "username",
-            label: "Nombre de Usuario",
-            bclass: "form-control",
-            placeholder: "Nombre de usuario",
-            value: formData.username, // Establece el valor de username desde el estado formData
-            onChange: (value) => handleInputChange("username", value), // Maneja los cambios en el username
-          },
-          {
-            name: "password",
-            label: "Contraseña",
-            bclass: "form-control",
-            placeholder: "Contraseña",
-            inputType: "password",
-            value: formData.password, // Establece el valor de password desde el estado formData
-            onChange: (value) => handleInputChange("password", value), // Maneja los cambios en el password
-          },
-          {
-            name: "remenber",
-            bclass: "form-check-input",
-            inputType: "checkbox",
-            label: "Recordarme?",
-            value: formData.password, // Establece el valor de password desde el estado formData
-            onChange: (value) => handleInputChange("password", value), // Maneja los cambios en el password
-          },
-        ]}
-        onSubmit={handleLogin}
-      />
+    <Card title="Iniciar Sesión" footer={null} image={Isotipo} w={"20rem"}>
+      <GenericFormReact manager={manager}
+      >
+        {formFields.map((field) => <FormField {...field} />)}
+      </GenericFormReact>
+      <CircleIconButton icon="bi bi-rocket" title="Iniciar sesión" onPress={handleLogin} />
     </Card>
   );
 };
