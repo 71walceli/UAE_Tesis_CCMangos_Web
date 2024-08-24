@@ -15,16 +15,14 @@ export const LoaderProvider = ({ children }: any) => {
   const [counter, setCounter] = useState(0);
   const isLoading = counter > 0;
   
-  // TODO Manejar con contadp, ya qye existen multiples llamadas concurrentes.
-
   const showLoader = () => {
-    // TODO setTimeout(() => { setCounter(v => v + 1); }, 100);
     setCounter(v => v + 1);
   };
 
   const hideLoader = () => {
     // TODO setTimeout(() => { setCounter(v => v - 1); }, 100);
-    setCounter(v => v - 1);
+    setTimeout(() => { setCounter(v => v > 0 ? v - 1 : 0); }, 166);
+    //setCounter(v => v - 1);
   };
 
   return (
