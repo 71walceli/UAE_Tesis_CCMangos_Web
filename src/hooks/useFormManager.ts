@@ -36,7 +36,7 @@ export const useFormManager = (reset: Object | ((Object?) => {}), validator?: Ob
     })
   }, [data])
 
-  return { data, set, reset, errors, 
+  return { data, set, reset, errors, validator,
     handleChange: (prop, value) => set(prevData => ({
       ...prevData,
       [prop]: value,

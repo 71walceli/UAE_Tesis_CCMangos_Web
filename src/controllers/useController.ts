@@ -16,35 +16,39 @@ interface IController {
 export const useCoontroller = <T extends IndexedT>(apiEndpoint: string) => {
   console.log({source: "useController", apiEndpoint})
   const { showLoader, hideLoader } = useLoader()
-  const authContext = useAuth()
-  const { get, patch, post, remove } = useApiController(authContext)
+  const { get, patch, post, remove } = useApiController(useAuth())
+  
   const [ records, setRecords ] = useState<T[]>([])
   useEffect(() => console.log({ source:"useController", records }), [records])
+  
+  const [ index, setIndex ] = useState<{[key: number]: number}>({})
+  useEffect(() => console.log({ index: index }), [index])
 
-  const index = useMemo(() => arrayIndexer(records), [records])
-  useEffect(() => console.log({ index }), [index])
-
+  const [ ready, setReady ] = useState(false)
   const { notify } = useToaster()
 
-  const readAll = () => get<T[]>(apiEndpoint)
-    .then((records) => {
-      setRecords(records);
-    })
-    .catch(e => { 
-      notify(
-        `Ha ocurrido un error del sistema`, 
-        "error"
-      )
-      throw e 
-    })
-    .finally(() => {
-      hideLoader()
-    })
+  const readAll = () => {
+    setReady(false);
+    return get<T[]>(apiEndpoint)
+      .then((records) => {
+        setRecords(records);
+        setIndex(arrayIndexer(records));
+      })
+      .catch(e => {
+        notify(
+          `Ha ocurrido un error del sistema`,
+          "error"
+        );
+        throw e;
+      })
+      .finally(() => {
+        hideLoader();
+        setReady(true);
+      });
+  }
   useEffect(() => {
     (async () => {
-      //showLoader()
       await readAll();
-      //hideLoader()
     })()
   }, []);
 
@@ -83,9 +87,10 @@ export const useCoontroller = <T extends IndexedT>(apiEndpoint: string) => {
   const findById = <I>(id: number) => records[index[id]]
 
   // TODO 10000 Refactor to use common Code
-  const checkCodeExists = (entity: string, code: string) => get("/misc/verificar_existencia", {
+  const checkCodeExists = (entity: string, code: string, parent_id) => get("/misc/verificar_existencia", {
     entidad: entity, 
     codigo: code,
+    parent_id,
   }).then(({result, objects}) => result)
 
   const selectOptions = (getLabel) => records
@@ -101,7 +106,8 @@ export const useCoontroller = <T extends IndexedT>(apiEndpoint: string) => {
       return all
     }, {}))
   
-  return { records, loadAll: readAll, save, findById, checkCodeExists, selectOptions, filterOptions,
+  return { records, loadAll: readAll, save, findById, checkCodeExists, selectOptions, filterOptions, 
+    ready,
     remove: (record: T) => (async () => {
       console.log({ record })
       showLoader();
