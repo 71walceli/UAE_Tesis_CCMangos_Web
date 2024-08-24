@@ -1,0 +1,134 @@
+{
+  "min": [
+    {
+      "date": "2023",
+      "Relat_Hum_Mean": 48.47762293845931,
+      "Wind_Speed_Mean": 1.5353955175531788,
+      "Wind_Speed_Min": 1.5329401866973345,
+      "Relat_Hum_Max": 47.175186708660505
+    },
+    {
+      "date": "2024",
+      "Relat_Hum_Mean": 40.13610844154678,
+      "Wind_Speed_Mean": 0.8664755570224941,
+      "Wind_Speed_Min": 1.3850068964874493,
+      "Relat_Hum_Max": 31.547164546579555
+    },
+    {
+      "date": "2025",
+      "Relat_Hum_Mean": 30.707398967047407,
+      "Wind_Speed_Mean": 0.6076334377154383,
+      "Wind_Speed_Min": 1.2295564053522388,
+      "Relat_Hum_Max": 15.076829683537468
+    },
+    {
+      "date": "2026",
+      "Relat_Hum_Mean": 24.116427841982446,
+      "Wind_Speed_Mean": 0.5371715056583185,
+      "Wind_Speed_Min": 1.0165363343519125,
+      "Relat_Hum_Max": 3.688059336981541
+    },
+    {
+      "date": "2027",
+      "Relat_Hum_Mean": 18.710617897159402,
+      "Wind_Speed_Mean": 0.5053331333176925,
+      "Wind_Speed_Min": 0.7069766391156763,
+      "Relat_Hum_Max": -5.627466956745093
+    },
+    {
+      "date": "2028",
+      "Relat_Hum_Mean": 14.194352353837049,
+      "Wind_Speed_Mean": 0.46943963469139854,
+      "Wind_Speed_Min": 0.32126967282815944,
+      "Relat_Hum_Max": -13.400035417432742
+    }
+  ],
+  "value": [
+    {
+      "date": "2023",
+      "Relat_Hum_Mean": 55.12383925731893,
+      "Wind_Speed_Mean": 1.878083071382029,
+      "Wind_Speed_Min": 1.703769135672768,
+      "Relat_Hum_Max": 56.62068965517241
+    },
+    {
+      "date": "2024",
+      "Relat_Hum_Mean": 55.18606504942385,
+      "Wind_Speed_Mean": 1.5252564220636842,
+      "Wind_Speed_Min": 2.109066835888246,
+      "Relat_Hum_Max": 56.620689655172434
+    },
+    {
+      "date": "2025",
+      "Relat_Hum_Mean": 55.185191118035966,
+      "Wind_Speed_Mean": 1.4076000170932037,
+      "Wind_Speed_Min": 2.8159804715284538,
+      "Relat_Hum_Max": 56.620689655172434
+    },
+    {
+      "date": "2026",
+      "Relat_Hum_Mean": 55.18519111803081,
+      "Wind_Speed_Mean": 1.3770585711507062,
+      "Wind_Speed_Min": 3.522103318390766,
+      "Relat_Hum_Max": 56.620689655172434
+    },
+    {
+      "date": "2027",
+      "Relat_Hum_Mean": 55.18519111803081,
+      "Wind_Speed_Mean": 1.3694215662004998,
+      "Wind_Speed_Min": 4.228226165008817,
+      "Relat_Hum_Max": 56.620689655172434
+    },
+    {
+      "date": "2028",
+      "Relat_Hum_Mean": 55.1851911180308,
+      "Wind_Speed_Mean": 1.3523784407274393,
+      "Wind_Speed_Min": 4.904927226351115,
+      "Relat_Hum_Max": 56.620689655172434
+    }
+  ],
+  "max": [
+    {
+      "date": "2023",
+      "Relat_Hum_Mean": 61.77005557617854,
+      "Wind_Speed_Mean": 2.220770625210879,
+      "Wind_Speed_Min": 1.8745980846482015,
+      "Relat_Hum_Max": 66.06619260168432
+    },
+    {
+      "date": "2024",
+      "Relat_Hum_Mean": 70.23602165730091,
+      "Wind_Speed_Mean": 2.1840372871048745,
+      "Wind_Speed_Min": 2.8331267752890437,
+      "Relat_Hum_Max": 81.69421476376529
+    },
+    {
+      "date": "2025",
+      "Relat_Hum_Mean": 79.66298326902452,
+      "Wind_Speed_Mean": 2.2075665964709694,
+      "Wind_Speed_Min": 4.402404537704669,
+      "Relat_Hum_Max": 98.16454962680736
+    },
+    {
+      "date": "2026",
+      "Relat_Hum_Mean": 86.25395439407913,
+      "Wind_Speed_Mean": 2.216945636643094,
+      "Wind_Speed_Min": 6.0276703024296205,
+      "Relat_Hum_Max": 109.55331997336329
+    },
+    {
+      "date": "2027",
+      "Relat_Hum_Mean": 91.6597643389022,
+      "Wind_Speed_Mean": 2.2335099990833074,
+      "Wind_Speed_Min": 7.749475690901957,
+      "Relat_Hum_Max": 118.86884626708992
+    },
+    {
+      "date": "2028",
+      "Relat_Hum_Mean": 96.17602988222457,
+      "Wind_Speed_Mean": 2.2353172467634796,
+      "Wind_Speed_Min": 9.488584779874072,
+      "Relat_Hum_Max": 126.64141472777756
+    }
+  ]
+}

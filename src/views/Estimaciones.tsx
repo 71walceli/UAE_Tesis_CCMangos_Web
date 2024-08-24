@@ -1,4 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
+import { Modal } from 'react-bootstrap';
+import { endOfYear, startOfYear } from 'date-fns';
 
 import { Chart } from '../components/Chart';
 import { BaseLayout } from '../components/BaseLayout';
@@ -8,55 +10,235 @@ import useToaster from '../hooks/useToaster';
 import { Endpoints } from '../../../Common/api/routes';
 import { LoaderContext } from '../context/LoaderContext';
 import { CircleIconButton } from '../components/CircleIconButton';
-import { Modal } from 'react-bootstrap';
+import { useCoontroller } from '../controllers/useController';
+import { formatNumber } from '../../../Common/helpers/formats';
+import { abbreviations, strings } from '../../../Common/misc/resources';
+import { DateRangePicker, InputNumber } from 'rsuite';
 
 
 export const Estimaciones = () => {
   const { get } = useApiController(useAuth());
   const { notify } = useToaster()
 
-  const [ cosechas, setCosechas] = useState();
-  const [ datosClimáticos, setDatosClimáticos] = useState();
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const [ monthBounds, setMonthBounds ] = useState([startOfYear(currentDate), endOfYear(currentDate)])
+  useEffect(() => { console.log({monthBounds}) }, [monthBounds])
+  
+  const [ yearFilter, setYearFilter ] = useState([currentYear, currentYear])
+  useEffect(() => setYearFilter(
+    [monthBounds[0].getFullYear(), monthBounds[1].getFullYear()]//.join(",")
+  ), [monthBounds])
+  useEffect(() => { console.log({yearFilter}) }, [yearFilter])
 
-  useEffect(() => {
-    (async () => {
-      try {
-        setCosechas( await (get(Endpoints.PrediccionesCosecha).then(({results}) => results)) )
-        setDatosClimáticos( await (get(Endpoints.PrediccionesClima).then(({results}) => results)) )
-      } catch (error) {
-        console.error(error)
-        notify("Problema al cargar las estimaciones", "error");
-      }
-    })();
-  }, {cosechas, datosClimáticos})
-
-  const translations = {
-    Precipitation: "Precipitaciones",
-    Temp_Air: "Temperatura",
-    Temp_Air_Mean: "Temperatura",
-    Temp_Air_Min: "Temperatura Min.",
-    Temp_Air_Max: "Temperatura Máx.",
-    Dew_Temp: "Punto de Rocío",
-    Dew_Temp_Mean: "Punto de Rocío",
-    Dew_Temp_Max: "Punto de Rocío Min.",
-    Dew_Temp_Min: "Punto de Rocío Máx.",
-    Relat_Hum: "Humedad Relativa",
-    Relat_Hum_Mean: "Humedad Relativa",
-    Relat_Hum_Min: "Humedad Relativa Min.",
-    Relat_Hum_Max: "Humedad Relativa Máx.",
-    Wind_Speed: "Velocidad del viento",
-    Wind_Speed_Mean: "Velocidad del viento",
-    Wind_Speed_Min: "Velocidad del viento Min.",
-    Wind_Speed_Max: "Velocidad del viento Máx.",
-    Atmospheric_Pressure: "Presión Atmosférica",
-    Atmospheric_Pressure_Max: "Presión Atmosférica Min.",
-    Atmospheric_Pressure_Min: "Presión Atmosférica Máx.",
-  }
+  const {
+    records: _datosClima,
+  } = useCoontroller(Endpoints.WeatherData);
+  const datosClimaMensuales = useMemo(() => {
+    const environmentalProps = [
+      "Temp_Air_Min",
+      "Temp_Air_Mean",
+      "Temp_Air_Max",
+      "Dew_Temp_Min",
+      "Dew_Temp_Mean",
+      "Dew_Temp_Max",
+      "Relat_Hum_Min",
+      "Relat_Hum_Mean",
+      "Relat_Hum_Max",
+      "Wind_Speed_Min",
+      "Wind_Speed_Mean",
+      "Wind_Speed_Max",
+      "Precipitation",
+      "Atmospheric_Pressure_Min",
+      "Atmospheric_Pressure_Max",
+    ]
+    return Object.entries(
+      _datosClima.reduce((all, item) => {
+        const month = item.Date.substring(0, 7)
+        if (!all[month]) {
+          all[month] = []
+        }
+        all[month].push(item)
+        return all
+      }, {})
+    )
+      .map(([key, item]) => ({
+        Date: key,
+        ...item.reduce(
+          (aggregated, item) => {
+            environmentalProps.forEach(key => aggregated[key].push(item[key] ? Number(item[key]) : null))
+            return aggregated
+          },
+          Object.fromEntries(environmentalProps.map(key => [key, []]))
+        )
+      }))
+      .map(item =>
+        Object.fromEntries([
+          ["x", item.Date],
+          ...environmentalProps
+            .map(prop => [prop, item[prop].filter(v => v)])
+            .filter(([_, value]) => value.length > 0)
+            .map(([prop, value]) => {
+              if (!item[prop]) {
+                return [undefined, undefined]
+              }
+              return [
+                prop,
+                value.reduce((total, current) => total + current, 0) / value.length
+              ]
+            })
+        ])
+      )
+  }, [_datosClima])
 
   const { showLoader, hideLoader } = useContext(LoaderContext)
 
-  const [ openModal, setOpenModel ] = useState(false)
-  const handleClose = () => setOpenModel(false)
+  const { 
+    records: _cosechas,
+  } = useCoontroller<IProduccion>(Endpoints.Produccion);
+  const cosechas = useMemo(() => _.chain(_cosechas)
+    .sortBy((a1) => a1.Fecha)
+    .groupBy(p => `${p.Variedad.Nombre} ${p.Fecha.substring(0, 4)}`)
+    .keyBy(p => p[0].Variedad.Nombre)
+    .mapValues(p => ({
+      lotes: p.length,
+      anio: Number(p[0].Fecha.substring(0, 4)),
+    }))
+    .value(), [_cosechas])
+  useEffect(() => console.log({cosechas}), [cosechas])
+
+  const handleGetCosechas = async () => {
+    setCosechasPredichas(await (get(Endpoints.PrediccionesCosecha).then(({ results }) => Object.fromEntries(
+      Object.entries(results)
+        .map(([variedad, r]) => [variedad, ({
+          ...r,
+          min: r.min.map(v => Number(v) * cosechas[variedad].lotes),
+          value: r.value.map(v => Number(v) * cosechas[variedad].lotes),
+          max: r.max.map(v => Number(v) * cosechas[variedad].lotes),
+        })])
+    )
+    )));
+  }
+  const [ cosechasPredichas, setCosechasPredichas] = useState();
+  useEffect(() => {
+    (async () => {
+      if (!cosechas)
+        return
+      try {
+        if (!cosechasPredichas) {
+          showLoader()
+          await handleGetCosechas();
+        }
+      } catch (error) {
+        console.error(error)
+        notify("Problema al cargar las estimaciones", "error");
+      } finally {
+        hideLoader()
+      }
+    })();
+  }, [cosechasPredichas, cosechas])
+  useEffect(() => console.log({cosechasPredichas}), [cosechasPredichas])
+
+  const [ _datosClimaPredichos, setDatosClimaPredichos] = useState();
+  useEffect(() => {
+    (async () => {
+      try {
+        if (!_datosClimaPredichos) {
+          showLoader()
+          setDatosClimaPredichos( await (get(Endpoints.PrediccionesClima).then(({results}) => results)) )
+        }
+      } catch (error) {
+        console.error(error)
+        notify("Problema al cargar las estimaciones", "error");
+      } finally {
+        hideLoader()
+      }
+    })();
+  }, [_datosClimaPredichos])
+  const datosClimaAnuales = useMemo(() => {
+    if (!_datosClimaPredichos) {
+      return []
+    }
+
+    let output = _datosClimaPredichos
+    output = Object.entries(
+      Object.entries(output).map(([variable, seriesTiempo]) => [
+        ...Object.entries(seriesTiempo.min).map(([date, value]) => ({
+          variable,
+          date,
+          value,
+          rank: "min"
+        })),
+        ...Object.entries(seriesTiempo.value).map(([date, value]) => ({
+          variable,
+          date,
+          value,
+          rank: "value"
+        })),
+        ...Object.entries(seriesTiempo.max).map(([date, value]) => ({
+          variable,
+          date,
+          value,
+          rank: "max"
+        })),
+      ])
+        .flatMap(x => x)
+        .reduce((acc, item) => {
+          const { date, rank, value, variable } = item
+          if (!acc[rank]) {
+            acc[rank] = {}
+          }
+          const year = date.substring(0, 4)
+          if (!acc[rank][year]) {
+            acc[rank][year] = {}
+          }
+          acc[rank][year][`${variable}_count`] = (acc[rank][year][`${variable}_count`] || 0) + 1
+          acc[rank][year][variable] = (acc[rank][year][variable] || 0) + value
+
+          setMonthBounds(([start, end]) => {
+            const month = new Date(date.substring(0, 7))
+            return [
+              month < start ? month : start,
+              month > end ? month : end
+            ]
+          })
+          return acc
+        }, {})
+    )
+    output = Object.fromEntries(output
+      .map(([rank, timeSeries]) => [rank, Object.fromEntries(Object.entries(timeSeries)
+        .map(([year, vars]) => [year, Object.fromEntries(Object.entries(vars)
+          .filter(([key]) => !key.endsWith('_count'))
+          .map(([variable, value]) => [variable, value / vars[`${variable}_count`]])
+        )])
+      )])
+      .map(([rank, timeSeries]) => [rank, Object.entries(timeSeries)
+        .map(([year, vars]) => ({ date: year, ...vars }))
+      ])
+    )
+    return output
+  }, [_datosClimaPredichos])
+
+  const [metricas, setMetricas] = useState<undefined>();
+  useState(() => {
+    (async () => {
+      try {
+        if (!metricas) {
+          showLoader()
+          setMetricas( await (get(Endpoints.PrediccionesMetricas).then(({results}) => results)) )
+        }
+      } catch (error) {
+        console.error(error)
+        notify("Problema al cargar las métricas", "error");
+      } finally {
+        hideLoader()
+      }
+    })();
+  }, [metricas])
+  useEffect(() => { console.log({metricas}) }, [metricas])
+  
+  const [ openModal, setOpenModel ] = useState<string | null>(null)
+  const handleClose = () => setOpenModel(null)
 
   return (
     <BaseLayout PageName='Estimaciones de Producción'>
@@ -64,13 +246,39 @@ export const Estimaciones = () => {
         <div className="d-flex justify-content-end" style={{
           gap: 15,
         }}>
+          <div className="d-flex flex-column align-items-center">
+            <InputNumber value={yearFilter[0]} formatter={v => `Desde ${v}`}
+              onChange={_year => setYearFilter(_yearFilter => {
+                _yearFilter = _yearFilter.map(Number)
+                _year = Number(_year)
+                if (_year +2 > _yearFilter[1] || _year < monthBounds[0].getFullYear()) {
+                  _yearFilter = [..._yearFilter,];
+                } else {
+                  _yearFilter = [_year, _yearFilter[1]];
+                }
+                return _yearFilter
+              })} 
+            />
+            <InputNumber value={yearFilter[1]} formatter={v => `hasta ${v}`}
+              onChange={_year => setYearFilter(_yearFilter => {
+                _yearFilter = _yearFilter.map(Number)
+                _year = Number(_year)
+                if (_yearFilter[0] +2 > _year || _year > monthBounds[1].getFullYear()) {
+                  _yearFilter = [..._yearFilter,];
+                } else {
+                  _yearFilter = [_yearFilter[0], _year];
+                }
+                return _yearFilter
+              })} 
+            />
+          </div>
           <CircleIconButton title="Actualizar" icon="bi bi-arrow-clockwise" 
             onClick={() => {
-              // TODO Add real logic
               showLoader()
-              setTimeout(() => {
-                hideLoader()
-              }, 750 + Math.random()*2000)
+              get(Endpoints.PrediccionesActualizar)
+                .then(handleGetCosechas)
+                .catch(e => notify("Error al actualizar predicciones", "error"))
+                .finally(hideLoader)
             }} 
           />
           <CircleIconButton title="Explícame" icon="bi bi-question" 
@@ -79,11 +287,11 @@ export const Estimaciones = () => {
         </div>
       </div>
 
-      {cosechas 
+      {cosechasPredichas 
         ?<div className='container'>
         <h2 className='text-center'>Predicciones de Producción de Mango</h2>
         <div className="row">
-          {Object.entries(cosechas).map(([variedad, _variedad]) => <div key={variedad} 
+          {Object.entries(cosechasPredichas).map(([variedad, _variedad]) => <div key={variedad} 
             className="col-md-6"
           >
             <Chart type="line"
@@ -91,46 +299,72 @@ export const Estimaciones = () => {
               series={['min', 'value', 'max']}
               data={
                 _variedad.min.map((minValue, index) => ({
-                  x: 2023 + index,
+                  x: monthBounds[0].getFullYear() + index,
                   min: minValue,
                   value: _variedad.value[index],
-                  max: _variedad.max[index]
+                  max: _variedad.max[index],
                 }))
+                  .filter(({x}) => x >= yearFilter[0] && x <= yearFilter[1])
               }
             />
+            <table className='table table-bordered table-striped'>
+              <tr>
+                <th>Año</th>
+                {/* <th>Valor</th> */}
+                <th className='text-center'>Producción (kg)</th>
+                {metricas?.variables_seleccionadas?.[variedad].map((variable, _index) => (
+                  <th key={_index} className="text-center">{abbreviations[variable]}</th>
+                ))}
+              </tr>
+              {Array.from({length: 6}, (_, index) => index)
+                .filter(x => x+monthBounds[0].getFullYear() >= yearFilter[0] 
+                  && x+monthBounds[0].getFullYear() <= yearFilter[1]
+                )
+                .map((index) => (
+                  "value".split(" ").map(rank => (
+                    <tr key={`${index} ${rank}`}>
+                      <td>{monthBounds[0].getFullYear() + index}</td>
+                      {/* <td>{abbreviations[rank]}</td> */}
+                      <td className="text-end">{formatNumber(_variedad[rank][index])}</td>
+                      {metricas?.variables_seleccionadas?.[variedad].map((variable, _index) => (
+                        <td key={_index} className="text-end">
+                          {formatNumber(datosClimaAnuales[rank]?.[index][variable])}
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                ))
+              }
+            </table>
           </div>)}
         </div>
       </div>
       :null
     }
-    {datosClimáticos
+    {_datosClimaPredichos
       ?<div className='container'>
         <h2 className='text-center'>Predicciones de variables edafoclimáticas</h2>
         <div className="row">
-          {Object.entries(datosClimáticos).map(([variable, _variable]) => <div key={variable} 
+          {Object.entries(_datosClimaPredichos).map(([variable, _variable]) => <div key={variable} 
             className="col-md-6"
           >
             <Chart type="line" 
               series={['min', 'value', 'max']}
-              title={
-                translations[variable]
-              }
+              title={strings[variable]}
               data={(() => {
                 const data = _variable;
-                // Merge keys from min, value, and max, then deduplicate
                 const allDates = [...new Set([
                   ...Object.keys(data.min), 
                   ...Object.keys(data.value), 
                   ...Object.keys(data.max)])
                 ];
 
-                const formattedData = allDates.map(date => ({
+                return allDates.map(date => ({
                   x: date.substring(0, 7),
-                  min: data.min[date] || null, // Use null or a suitable default value if the date is missing
-                  value: data.value[date] || null,
-                  max: data.max[date] || null
+                  min: data.min[date] || 0,
+                  value: data.value[date] || 0,
+                  max: data.max[date] || 0,
                 }));
-                return formattedData;
               })()}
             />
           </div>)}
@@ -190,52 +424,28 @@ export const Estimaciones = () => {
             <table className='table table-striped table-bordered'>
               <tr>
                 <th className='text-center'>Mes</th>
-                <th className='text-center'>Temp. Media (°C)</th>
-                <th className='text-center'>...</th>
-                <th className='text-center'>Hum. Rel. (%)</th>
+                <th className='text-center'>{strings["Relat_Hum_Mean"]}</th>
+                <th className='text-center'>{strings["Wind_Speed_Mean"]}</th>
               </tr>
-              <tr>
-                <td className="">2017-01</td>
-                <td className="text-end">24.6</td>
-                <td className="text-center">...</td>
-                <td className="text-end">54</td>
-              </tr>
-              <tr>
-                <td className="">2017-02</td>
-                <td className="text-end">37</td>
-                <td className="text-center">...</td>
-                <td className="text-end">76</td>
-              </tr>
-              <tr>
-                <td className="">2017-03</td>
-                <td className="text-end">22.1</td>
-                <td className="text-center">...</td>
-                <td className="text-end">65</td>
-              </tr>
+              {datosClimaMensuales.slice(0,3).map((item, index) => (
+                <tr key={index}>
+                  <td className="">{item.x}</td>
+                  <td className="text-end">{formatNumber(item.Relat_Hum_Mean)}</td>
+                  <td className="text-end">{formatNumber(item.Wind_Speed_Mean)}</td>
+                </tr>
+              ))}
               <tr>
                 <td className="text-center">...</td>
                 <td className="text-center">...</td>
                 <td className="text-center">...</td>
-                <td className="text-center">...</td>
               </tr>
-              <tr>
-                <td className="">2023-09</td>
-                <td className="text-end">31.1</td>
-                <td className="text-center">...</td>
-                <td className="text-end">65</td>
-              </tr>
-              <tr>
-                <td className="">2023-10</td>
-                <td className="text-end">28.4</td>
-                <td className="text-center">...</td>
-                <td className="text-end">71</td>
-              </tr>
-              <tr>
-                <td className="">2023-11</td>
-                <td className="text-end">26.4</td>
-                <td className="text-center">...</td>
-                <td className="text-end">78</td>
-              </tr>
+              {datosClimaMensuales.slice(datosClimaMensuales.length -3).map((item, index) => (
+                <tr key={index}>
+                  <td className="">{item.x}</td>
+                  <td className="text-end">{formatNumber(item.Temp_Air_Mean)}</td>
+                  <td className="text-end">{formatNumber(item.Relat_Hum_Mean)}</td>
+                </tr>
+              ))}
             </table>
 
             <li>
@@ -249,30 +459,17 @@ export const Estimaciones = () => {
             <table className='table table-striped table-bordered'>
               <tr>
                 <th className='text-center'>Mes</th>
-                <th className='text-center'>Temp. Media (°C)</th>
-                <th className='text-center'>...</th>
-                <th className='text-center'>Hum. Rel. (%)</th>
+                <th className='text-center'>{strings["Relat_Hum_Mean"]}</th>
+                <th className='text-center'>{strings["Wind_Speed_Mean"]}</th>
               </tr>
+              {datosClimaAnuales?.value?.slice(1,4).map((item, index) => (
+                <tr key={index}>
+                  <td className="">{item.date}</td>
+                  <td className="text-end">{formatNumber(item.Relat_Hum_Mean)}</td>
+                  <td className="text-end">{formatNumber(item.Wind_Speed_Mean)}</td>
+                </tr>
+              ))}
               <tr>
-                <td className="">2023-12</td>
-                <td className="text-end">23.4</td>
-                <td className="text-center">...</td>
-                <td className="text-end">46</td>
-              </tr>
-              <tr>
-                <td className="">2024-01</td>
-                <td className="text-end">33.2</td>
-                <td className="text-center">...</td>
-                <td className="text-end">63</td>
-              </tr>
-              <tr>
-                <td className="">2024-02</td>
-                <td className="text-end">22.1</td>
-                <td className="text-center">...</td>
-                <td className="text-end">67</td>
-              </tr>
-              <tr>
-                <td className="text-center">...</td>
                 <td className="text-center">...</td>
                 <td className="text-center">...</td>
                 <td className="text-center">...</td>
@@ -289,30 +486,21 @@ export const Estimaciones = () => {
             <h5>Predicción de producción de mango</h5>
             <table className='table table-striped table-bordered'>
               <tr>
-                <th className='text-center'>Año</th>
-                <th className='text-center'>Tommy Atkins (Kg)</th>
-                <th className='text-center'>Ataulfo (Kg)</th>
+                <th className='text-center'>Variedad</th>
+                {Array.from({length: 3}, (_, i) => i + 2023).map((year, index) => (
+                  <th key={index} className='text-end'>{year}</th>
+                ))}
+                <th className="text-center">...</th>
               </tr>
-              <tr>
-                <td className="">2024</td>
-                <td className="text-end">9492.19</td>
-                <td className="text-end">1715,43</td>
-              </tr>
-              <tr>
-                <td className="">2025</td>
-                <td className="text-end">9593.01</td>
-                <td className="text-end">1803.72</td>
-              </tr>
-              <tr>
-                <td className="">2026</td>
-                <td className="text-end">9744.15</td>
-                <td className="text-end">2021.7</td>
-              </tr>
-              <tr>
-                <td className="text-center">...</td>
-                <td className="text-center">...</td>
-                <td className="text-center">...</td>
-              </tr>
+              {metricas?.variables_seleccionadas && Object.entries(metricas?.variables_seleccionadas).map(([variedad, predicciones], index) => (
+                <tr key={index}>
+                  <td className="">{variedad}</td>
+                  {cosechasPredichas?.[variedad].value.slice(1,4).map((item, index) => (
+                    <td className="text-end">{formatNumber(item)}</td> 
+                  ))}
+                  <td className="text-center">...</td>
+                </tr>
+              ))}
             </table>
 
           </ol>
