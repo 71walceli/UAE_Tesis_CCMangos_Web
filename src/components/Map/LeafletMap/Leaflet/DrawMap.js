@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react";
 
-import L, { point } from "leaflet";
-import { MapContainer, TileLayer, FeatureGroup, useMap, Polygon, Tooltip } from "react-leaflet";
+
+import L from "leaflet";
+import { MapContainer, TileLayer, FeatureGroup, useMap, Polygon, Marker as LlMarker, Tooltip } from "react-leaflet";
 import { EditControl } from "react-leaflet-draw";
 import { useRef } from "react";
 import "leaflet/dist/leaflet.css";
@@ -10,6 +11,7 @@ import "leaflet-draw/dist/leaflet.draw.css";
 import osm from "./osm-providers";
 
 import { getArea, getCenter, getLength } from "../../../../../../Common/utils/polygons";
+import { formatNumber } from "../../../../../../Common/helpers/formats";
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
@@ -21,54 +23,82 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/images/marker-shadow.png",
 });
 
-const LeafletContext = () => {
+const MapCenterer = ({center, zoom}) => {
   const map = useMap()
+  
   useEffect(() => {
-    console.log(map._layers)
-  }, [map._layers])
+    if (!map) {
+      return;
+    }
+    if (!center || !center.lng || !center.lat) {
+      return;
+    }
+    console.log({center, zoom});
+    map.setView(center, zoom || map.getZoom());
+  }, [center, map, zoom]);
 }
 
 const DEFAULT_CENTER = { lat: -2.368, lng: -80.2721 };
+const DEFAULT_ZOOM_LEVEL = 14;
 
-export const DrawMap = ({value, onChange, otherRegions, error, ...props}) => {
-  const [center, setCenter] = useState();
-  //const [layer, setLayer] = useState({});
-
-  const polygon = useMemo(() => {
+export const DrawMap = ({
+  value, onChange, otherRegions, error, label, type, required, center, zoom,
+  ...props
+}) => {
+  if (!type) {
+    throw new Error("Type is required");
+  }
+  const [ _center, _setCenter ] = useState(() => {
+    if (center && center.lng && center.lat) {
+      return center;
+    }
     if (value?.points?.length > 0) {
-      const newCenter = getCenter(value.points);
+      const newCenter = type === "polygon" ? getCenter(value.points) : value.points[0];
       console.log({newCenter});
-      setCenter(newCenter);
+      return newCenter;
+    }
+    return DEFAULT_CENTER;
+  });
+  useEffect(() => {
+    if (center && center.lng && center.lat) {
+      _setCenter(center);
+    }
+  }, [center]);
+
+  const [ _zoom, _setZoom ] = useState(zoom || DEFAULT_ZOOM_LEVEL);
+  useEffect(() => {
+    if (zoom) {
+      _setZoom(zoom);
+    }
+  }, [zoom]);
+
+  const shape = useMemo(() => {
+    console.log({value});
+    if (value?.points?.length > 0) {
       return { ...value, points: value.points.map(point => ({...point}) )};
     } else {
-      setCenter(DEFAULT_CENTER);
       return { points: [], name: "" };
     }
   }, []);
-  const [_value, _onChange] = useState(polygon);
-  /* const [polygon, setPolygon] = useState(value?.points?.length > 0 
-    ?value 
-    :{ points: [], name: "" }
-  ); */
+  const [_value, _onChange] = useState(shape);
   
-  useEffect(() => {
-    if (value?.points?.length > 0) {
-      const newCenter = getCenter(value.points);
-      console.log({newCenter});
-      setCenter(newCenter);
-    } else {
-      setCenter(DEFAULT_CENTER);
-    }
-  }, [value]);
-  const ZOOM_LEVEL = 14;
   const mapRef = useRef();
 
   const handlePolygonCreated = (e) => {
     console.log(e);
     const { layer } = e;
     const polygon = layer.toGeoJSON();
-    const latlngs = polygon.geometry.coordinates[0].map((item) => ({ lng: item[0], lat: item[1] }));
-    console.log(latlngs);
+    console.log({polygon});
+    const latlngs = type === "polygon" 
+      ? polygon.geometry.coordinates[0].map((item) => ({ lng: item[0], lat: item[1] }))
+      : type === "point"
+      ? [{
+        lat: polygon.geometry.coordinates[1],
+        lng: polygon.geometry.coordinates[0],
+      }]
+      : null
+    ;
+    console.log({latlngs});
     onChange({points: latlngs});
     _onChange({points: latlngs});
   };
@@ -92,81 +122,122 @@ export const DrawMap = ({value, onChange, otherRegions, error, ...props}) => {
     rectangle: false,
     circle: false,
     circlemarker: false,
-    marker: false,
-    polygon: true,
+    marker: type === "point" && (_value?.points?.length || 0) < 1,
+    polygon: type === "polygon" && (_value?.points?.length || 0) < 3,
     polyline: false,
-    edit: false,
   };
 
   return (
     <>
-      {center
-        ?<MapContainer center={center} zoom={ZOOM_LEVEL} ref={mapRef} scrollWheelZoom={false}
-          style={{ minHeight: 400, width: "100%" }}
-        >
-          {/* <LeafletContext /> */}
-          {otherRegions?.map(polygon => <Polygon positions={polygon.points} color={polygon.color}>
+      <MapContainer center={_center} zoom={_zoom} ref={mapRef} scrollWheelZoom={false}
+        style={{ minHeight: 400, width: "100%" }}
+      >
+        <MapCenterer center={_center} zoom={_zoom} />
+        {otherRegions?.filter(shape => shape.type === "polygon").map(shape => (
+          <Polygon key={shape.name} id={shape.name} positions={shape.points} color={shape.color}>
             <Tooltip>
-              {polygon.name}
+              {shape.name}
               <br />
-              {getArea(polygon.points) / 10000} Ha.
+              {getArea(shape.points) / 10000} Ha.
               <br />
-              {getLength(polygon.points)} Km
+              {getLength(shape.points)} Km
             </Tooltip>
-          </Polygon>)
-          }
-          <FeatureGroup>
-            <Polygon positions={polygon.points} color="green">
+          </Polygon>
+        ))}
+        {otherRegions?.filter(shape => shape.type === "point").map(shape => (
+          <Polygon key={shape.name} id={shape.name} positions={shape.points} color={shape.color} /* size={[10,10]} */>
+            <Tooltip>{shape.name}</Tooltip>
+          </Polygon>
+        ))}
+        <FeatureGroup>
+          <EditControl 
+            position="topright"
+            onCreated={handlePolygonCreated}
+            onEdited={handlePolygonEdited}
+            onDeleted={handlePolygonDeletion}
+            draw={editOptions}
+          />
+          {shape?.points?.length > 0 && type === "polygon"
+            ?<Polygon id={shape.name} positions={shape.points} color="green">
               <Tooltip>
-                {polygon.name}
+                {shape.name}
                 <br />
-                {getArea(polygon.points) / 10000} Ha.
+                {getArea(shape.points) / 10000} Ha.
                 <br />
-                {getLength(polygon.points)} Km
+                {getLength(shape.points)} Km
               </Tooltip>
             </Polygon>
-            <EditControl 
-              position="topright"
-              onCreated={handlePolygonCreated}
-              onEdited={handlePolygonEdited}
-              onDeleted={handlePolygonDeletion}
-              draw={{ ...editOptions, polygon: (_value?.points?.length || 0) < 3, }}
-            />
-            }
-          </FeatureGroup>
-          <TileLayer
-            url={osm.maptiler.url}
-            attribution={osm.maptiler.attribution}
-          />
-          {error 
-            ?<div 
-              style={{
-                position: "absolute",
-                bottom: 15,
-                right: 0,
-                padding: 10,
-                backgroundColor: "white",
-                color: "red",
-                zIndex: 1000,
-              }}
-            >
-              {error}
-            </div>
             :null
           }
-          {/* <CoordinatesControl /> */}
-          <MapEvents />
-        </MapContainer>
-        :null
-      }
+          {shape?.points?.length > 0 && type === "point"
+            ?<LlMarker id={shape.name} position={shape.points[0]} color="green">
+              <Tooltip>
+                {shape.name}
+                <br />
+                {getArea(shape.points) / 10000} Ha.
+                <br />
+                {getLength(shape.points)} Km
+              </Tooltip>
+            </LlMarker>
+            :null
+          }
+        </FeatureGroup>
+        <TileLayer
+          url={osm.maptiler.url}
+          attribution={osm.maptiler.attribution}
+        />
+
+        {/* Over the map controls */}
+        {label && <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            width: "100%",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            paddingLeft: 50,
+            paddingRight: 50,
+          }}
+        >
+          <label style={{
+            padding: 10,
+            backgroundColor: "#ffffffcc",
+            zIndex: 1000,
+            borderEndEndRadius: 10,
+            borderEndStartRadius: 10,
+          }}>
+            {label} {required && <span className="text-danger">*</span>}
+          </label>
+        </div>}
+        {error 
+          ?<div 
+            style={{
+              position: "absolute",
+              bottom: 17,
+              right: 0,
+              padding: 10,
+              backgroundColor: "#ffffffcc",
+              color: "red",
+              zIndex: 1000,
+              borderStartStartRadius: 10,
+            }}
+          >
+            {error}
+          </div>
+          :null
+        }
+        {/* <CoordinatesControl /> */}
+        <MouseTracker />
+      </MapContainer>
     </>
   );
 };
 
-const MapEvents = () => {
-  const [coordinates, setCoordinates] = useState();
-
+const MouseTracker = () => {
   const map = useMap();
+  const [coordinates, setCoordinates] = useState(map.getCenter());
+
   useEffect(() => {
     const callback = (e) => {
       setCoordinates({ lat: e.latlng.lat, lng: e.latlng.lng });
@@ -189,12 +260,13 @@ const MapEvents = () => {
           bottom: 0,
           left: 0,
           padding: 10,
-          backgroundColor: "white",
+          backgroundColor: "#ffffffcc",
           zIndex: 1000,
+          borderStartEndRadius: 10,
         }}>
-          Lat: {coordinates.lat}
+          Lat: {formatNumber(coordinates.lat, 6)}
           <br />
-          Lng: {coordinates.lng}
+          Lng: {formatNumber(coordinates.lng, 6)}
         </div> 
         :null
       }
