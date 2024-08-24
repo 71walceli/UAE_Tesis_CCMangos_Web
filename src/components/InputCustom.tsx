@@ -1,4 +1,7 @@
-import React, { ChangeEvent, ReactNode, useState } from "react";
+import React, { ChangeEvent, ReactNode, useState, forwardRef } from "react";
+import { Uploader, UploaderProps } from "rsuite";
+
+import { RequiredMark } from "./RequiredMark";
 
 interface InputProps<T extends string | number> {
   type?: string;
@@ -28,6 +31,9 @@ export function Input<T>({
   disabled,
   readonly,
   maxlength,
+  required = false,
+  lines = 3,
+  ...props
 }: InputProps<string | number>) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -49,7 +55,7 @@ export function Input<T>({
     placeholder,
   }
   const commonProps = {
-    className: bclass || "",
+    className: bclass || "form-control",
     readonly: readonly,
     disabled,
     type,
@@ -58,55 +64,88 @@ export function Input<T>({
     onBlur: onBlur,
     onFocus: onFocus,
   }
-  //console.log({stringProps})
 
   return (
-    <div>
-      {type === "checkbox" ? (
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <input {...commonProps} />
-          {label && <label style={{ marginLeft: "5px" }} htmlFor="checkbox">{label}</label>}
-        </div>
-      ) : (
-        <>
-          {label && <label className="form-label">{label}</label>}
-          {type === "password" ? (
-            <div style={{ display: "flex" }}>
-              <input
-                {...stringProps}
-                {...commonProps}
-                type={showPassword ? "text" : "password"}
-              />
-              <div className="password-toggle" onClick={handleTogglePassword}>
-                {showPassword ? (
-                  <i className="bi bi-eye-slash"></i>
-                ) : (
-                  <i className="bi bi-eye-fill"></i>
-                )}
+    <div style={{ ...props.style }}>
+      {type === "checkbox" 
+        ?(
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <input {...stringProps} {...commonProps} />
+            {label && <label style={{ marginLeft: "5px" }} htmlFor="checkbox">
+              {label} {required && <RequiredMark />}
+            </label>}
+          </div>
+        ):(
+          <>
+            {label && <label className="form-label">
+              {label} {required && <RequiredMark />}
+            </label>}
+            {type === "password"
+              ?(<div style={{ display: "flex", ...props.style }}>
+                <input
+                  {...stringProps}
+                  {...commonProps}
+                  type={showPassword ? "text" : "password"}
+                />
+                <div className="password-toggle" onClick={handleTogglePassword}>
+                  {showPassword ? (
+                    <i className="bi bi-eye-slash"></i>
+                  ) : (
+                    <i className="bi bi-eye-fill"></i>
+                  )}
+                </div>
               </div>
-            </div>
-          ) : (
-            type === "file" ? (
-              // Utiliza la propiedad 'accept' para especificar los tipos de archivo aceptados
-              <input
-                {...commonProps}
-                accept={accept} // Usa la propiedad 'accept' aquí
-                onChange={(event) => {
-                  if (onChange) {
-                    const typedValue = event.target.files;
-                    onChange(typedValue as unknown as T);
-                  }
-                }}
-              />
-            ) : (
-              <input
-                {...stringProps}
-                {...commonProps}
-              />
-            )
-          )}
-        </>
-      )}
+              ):(
+                type === "textarea" ? (
+                  // Utiliza la propiedad 'accept' para especificar los tipos de archivo aceptados
+                  <textarea style={{...props.style}} cols={lines}
+                    {...stringProps}
+                    {...commonProps}
+                  />
+                ) : (
+                  <input style={{...props.style}}
+                    {...stringProps}
+                    {...commonProps}
+                  />
+                )
+              )}
+          </>
+        )
+      }
     </div>
   );
 }
+
+export const UploaderInput = forwardRef(({
+  accept, required = false, autoUpload = false, name, value, onChange, label, ...props
+}: UploaderProps, ref) => {
+  value = value || [];
+
+  return <div>
+    <div style={{ display: "flex", alignItems: "stretch", flexDirection: "column", gap: 20 }}>
+      {label && <label style={{ marginLeft: "5px" }} htmlFor="checkbox">
+        {label} {required && <RequiredMark />}
+      </label>}
+      <Uploader {...props} 
+        ref={ref} // Pass ref here
+        style={{ width: "100%" }}
+        name={name}
+        accept={accept} autoUpload={autoUpload} fileList={value} onChange={onChange} 
+        onUpload={() => {}}
+      >
+        <div style={{ 
+          height: 200, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          border: '1px dashed #e5e5ea',
+          backgroundColor: '#80808080',
+          cursor: 'pointer',
+        }}>
+          <span>Click or Drag files to this area to upload</span>
+        </div>
+      </Uploader>
+    </div>
+  </div>
+}
+);

@@ -4,6 +4,7 @@ import { DateRangePicker, Message } from "rsuite";
 
 import { Input, UploaderInput } from "./InputCustom";
 import { SelectSearch } from "./SelectSearch";
+import { RequiredMark } from "./RequiredMark";
 
 
 export interface FormFieldProps {
@@ -52,16 +53,17 @@ export const FormField = forwardRef(({
   };
 
   return (
-    <div className="form-group">
+    <div className="form-group" style={{ minHeight: 100, ...props.style }}>
       {tips 
         ? <Message>{tips}</Message>
         : null
       }
       {
-        ["text", "password", "number", "email"].includes(inputType) || !inputType ? (
+        ["text", "password", "number", "email", "textarea"].includes(inputType) || !inputType ? (
           <Input
             {...props}
             {...commonProps}
+            placeholder={placeholder}
             type={inputType}
           />
         ) : inputType === "select" ? (
@@ -75,6 +77,7 @@ export const FormField = forwardRef(({
           <Form.Check
             {...props}
             {...commonProps}
+            label={<>{label} {props.required && <RequiredMark />}</>}
             checked={Boolean(value)}
             onChange={() => onChange(!value)} 
           />
@@ -87,7 +90,7 @@ export const FormField = forwardRef(({
           />
         ) : inputType === 'date' ? (
           <Form.Group>
-            <Form.Label>{label}</Form.Label>
+            <Form.Label>{label} {props.required && <RequiredMark />}</Form.Label>
             <Form.Control 
               type="date"
               {...props}
@@ -98,8 +101,8 @@ export const FormField = forwardRef(({
           </Form.Group>
         ) : inputType === 'dateRange' ? (
           <Form.Group>
-            <Form.Label>{label}</Form.Label>
-            <DateRangePicker {...props} {...commonProps} cleanable={false} 
+            <Form.Label>{label} {props.required && <RequiredMark />}</Form.Label>
+            <DateRangePicker {...props} {...commonProps} label="" cleanable={false} 
               style={{ width: "100%" }}
             />
           </Form.Group>
@@ -133,8 +136,8 @@ export const GenericForm = ({
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="mb-3">
-        {fields.map((field) => <FormField {...field} error={manager?.errors?.[field.name]} />)}
+      <div className="mb-3 d-flex flex-column" style={{ gap: 13 }}>
+        {fields.map((field) => <FormField {...field} />)}
       </div>
       <div className="row">
         {showSubmit && (
@@ -153,19 +156,20 @@ export const GenericFormReact = ({
     e.preventDefault();
     onSubmit();
   };
-  children = children.length > 1 ? children : [children];
+  children = children?.length > 1 ? children : [children];
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="mb-3">
-        {children.filter(field => field).map?.(field => { 
+      <div className="mb-3 d-flex flex-column" style={{ gap: 13 }}>
+        {children.filter(field => field).map?.((field, i) => { 
           const Field = field.type
-          console.log({ source: "Form", Field })
+          console.log({ source: "Form", Field, props: field.props })
 
-          return <Field {...field.props} 
+          return <Field {...field.props} key={field.props.name || i}
             disabled={disabled || field.props.disabled}
-            value={manager.data[field.props.name]} 
+            value={field.props.value || manager.data[field.props.name]} 
             error={manager?.errors?.[field.props.name]}
+            required={field.props.required || manager.validator[field.props.name]}
             onChange={(value) => manager.set(previous => ({
               ...previous,
               [field.props.name]: value,

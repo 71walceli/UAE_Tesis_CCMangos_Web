@@ -1,5 +1,8 @@
 import React, { useEffect, useMemo }  from 'react';
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, BarChart, Bar, Tooltip, ResponsiveContainer, Legend, ScatterChart, Scatter  } from 'recharts';
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, 
+  ScatterChart, Scatter  
+} from 'recharts';
+
 import { dateFormatter } from '../../../Common/helpers/formats';
 
 
@@ -66,13 +69,15 @@ export const Chart = ({data, series, title, type, ...props}) => {
   }, [data])
   useEffect(() => console.log({ renderedData }), [renderedData])
 
-  return <div className='d-flex flex-column justify-content-center'>
+  return <div className={`d-flex flex-column justify-content-center ${props.className}`} >
     <h4 className='text-center w-100'>{title}</h4>
     <ResponsiveContainer height={400} {...props}>
       <ChartType data={renderedData}>
         {dataSeries?.map((series, i) => 
-          type === "line" ? <Line key={series} dataKey={series} stroke={COLORS[i]} />
-          :type === "scatter" ? <Scatter key={series} dataKey={series} color={COLORS[i]} />
+          type === "line" 
+            ?<Line key={series} dataKey={series} stroke={COLORS[i]} isAnimationActive={false} />
+          :type === "scatter" 
+            ?<Scatter key={series} dataKey={series} color={COLORS[i]} isAnimationActive={false} />
           :null
         )}
         <CartesianGrid stroke="#ccc" />

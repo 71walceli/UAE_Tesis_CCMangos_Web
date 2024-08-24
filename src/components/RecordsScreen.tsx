@@ -1,19 +1,23 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Modal } from 'react-bootstrap';
+import { Placeholder } from 'rsuite';
 
 import { BaseLayout } from './BaseLayout';
 import { CustomTable } from './CustomTable';
-import { GenericForm } from './Form';
+import { GenericForm, GenericFormReact } from './Form';
 import { AuthContext } from '../context/AuthContext';
 import { CircleIconButton } from './CircleIconButton';
 import { useLoader } from '../hooks/useLoader';
+import { Spacer } from './Spacer';
 
 
-export const RecordsScreen: React.FC = ({controller, columns, formManager, formFields, pageTitle, 
-    readonly, customActions, forbidCreate, burbidUpdate, forbidDelete,
-    ...props
-  }) => {
-  const { showLoader } = useLoader()
+export const RecordsScreen: React.FC = ({controller, columns, formManager, formFields, 
+  formFields__React, pageTitle, readonly, customActions, forbidCreate, burbidUpdate, forbidDelete, 
+  prepareSubmitForm, readiness,
+  ...props
+}) => {
+  if (!readiness) readiness = []
+  const { showLoader, isLoading } = useLoader()
   useEffect(() => showLoader(), [])
 
   const { records, save, findById, remove } = controller
@@ -30,7 +34,6 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
 
   return (
     <BaseLayout PageName={pageTitle}>
-      {/* <MapContainer initialCenter={center} polygons={polygons} /> */}
       <div className="container">
         <div className="d-flex justify-content-end">
           {!forbidCreate && !readonly 
@@ -66,52 +69,61 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
         </div>
         <hr />
         <div className="row">
-          <CustomTable columns={columns} data={records} 
-            selectRow={{
-              mode: 'radio',
-              clickToSelect: true,
-              selected: selection ? [selection] : [],
-              onSelect: (cell, row) => {
-                console.log({ cell, row })
-                setSelection(cell.id)
-              },
-            }} 
-            keyField="id" 
-            defaultSorted={[
-              {
-                dataField: 'Codigo_Lote',
-                order: 'asc'
-              },
-              {
-                dataField: 'Nombre',
-                order: 'asc'
-              },
-            ]}
-          />
+          {!isLoading && readiness.every(Boolean)
+            ?<CustomTable columns={columns} data={records} 
+              selectRow={{
+                mode: 'radio',
+                clickToSelect: true,
+                selected: selection ? [selection] : [],
+                onSelect: (cell, row) => {
+                  console.log({ cell, row })
+                  setSelection(cell.id)
+                },
+              }} 
+              keyField="id" 
+              defaultSorted={[
+                {
+                  dataField: 'Codigo_Lote',
+                  order: 'asc'
+                },
+                {
+                  dataField: 'Nombre',
+                  order: 'asc'
+                },
+              ]}
+            />
+            :<Placeholder.Grid rows={10} columns={columns.length} active />
+          }
         </div>
       </div>
       <Modal show={openModal === "form"} onHide={handleClose} animation 
-        onExit={() => {
-          setSelection(null)
-        }}
-        onExited={() => {
-          setFormData(formReset())
-        }}
+        onExit={() => setSelection(null)}
+        onExited={() => setFormData(formReset())}
       >
+        <Modal.Header>
+          Formulario de {pageTitle} - {formData.id ? "Editar" : "Nuevo"}
+        </Modal.Header>
         <Modal.Body>
-          <GenericForm
-            manager={formManager}
-            showSubmit={false}
-            fields={formFields.map(field => ({
-              ...field,
-              value: formManager.data[field.name],
-              onChange: (value) => formManager.set(previous => ({
-                ...previous,
-                [field.name]: value,
-              })),
-              disabled: readonly,
-            }))}
-          />
+          {formFields 
+            ?<GenericForm className='d-flex' manager={formManager} showSubmit={false}
+              fields={formFields.map(field => ({
+                ...field,
+                value: formManager.data[field.name],
+                onChange: (value) => formManager.set(previous => ({
+                  ...previous,
+                  [field.name]: value,
+                })),
+                disabled: readonly,
+              }))}
+            />
+            :null
+          }
+          {formFields__React
+            ?<GenericFormReact className='d-flex' showSubmit={false} manager={formManager}>
+              {formFields__React?.props.children}
+            </GenericFormReact>
+            :null
+          }
         </Modal.Body>
         <Modal.Footer>
           <div className="d-flex justify-content-end">
@@ -127,7 +139,7 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
                 title="Guardar"
                 onPress={() => {
                   (async () => {
-                    const nuevoRegistro = {
+                    let nuevoRegistro = {
                       ...formData,
                       Usuario: UserData?.usuario.user || -1,
                     };
@@ -137,10 +149,13 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
                         return
                       }
                       nuevoRegistro[key] = value?.value ? value.value : value
-                      if (nuevoRegistro[key].constructor.name === "Array") {
-                        nuevoRegistro[key] = nuevoRegistro[key].map(({value}) => value)
+                      if (nuevoRegistro[key]?.constructor.name === "Array") {
+                        nuevoRegistro[key] = nuevoRegistro[key].map(({value, ...rest}) => value || rest)
                       }
                     })
+                    if (prepareSubmitForm) {
+                      nuevoRegistro = prepareSubmitForm(nuevoRegistro)
+                    }
                     console.log({nuevoRegistro})
 
                     await save(nuevoRegistro)
@@ -176,7 +191,7 @@ export const RecordsScreen: React.FC = ({controller, columns, formManager, formF
               icon="bi bi-check"
               onPress={handleClose} 
               />
-            <span style={{ width: 15 }} />
+            <Spacer />
             <CircleIconButton 
               color='pink'
               icon="bi bi-x"

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
+import { RequiredMark } from "./RequiredMark";
 const animatedComponents = makeAnimated();
 interface Option {
     value: string;
@@ -25,13 +26,17 @@ export const SelectSearch = ({
     label,
     placeholder,
     bclass,
-    multiOptions=false,
+    disabled,
+    multiOptions = false,
+    required = false
 }: SelectSearchProps<any>) => {
-    
+    console.log(disabled)
 
     return (
         <>
-        {label && <label className="form-label">{label}</label>}
+        {label && <label className="form-label">
+            {label} {required && <RequiredMark />}
+        </label>}
         <Select
           closeMenuOnSelect={!multiOptions}
           components={animatedComponents}
@@ -39,6 +44,7 @@ export const SelectSearch = ({
           options={options}
           value={value}
           onChange={onChange}
+          isDisabled={disabled}
         />
         </>
 

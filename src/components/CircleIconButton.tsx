@@ -25,6 +25,7 @@ interface Props {
 
 export const CircleIconButton = ({
   onPress,
+  onClick,
   title,
   color = colores.LocationBg,
   colorTexto = colores.primario,
@@ -45,7 +46,7 @@ export const CircleIconButton = ({
     <TouchableOpacity
       activeOpacity={0.8}
       disabled={disabled}
-      onPress={onPress || onclick}
+      onPress={onPress || onClick}
       style={{
         height: alto,
         marginHorizontal: marginH,
