@@ -21,33 +21,9 @@ export const Plantas: React.FC = () => {
     records: lotes,
     findById: findLoteById,
     selectOptions: lotesOptions,
+    filterOptions: filterLotesOptions,
   } = useCoontroller<IArea>(Endpoints.áreas)
 
-  const columns = [
-    {
-      dataField: 'Codigo',
-      text: 'Código',
-      sort: true,
-      filter: textFilter()
-    },
-    {
-      dataField: 'Nombre',
-      text: 'Nombre',
-      sort: true,
-      filter: textFilter({
-        placeholder: "Buscar por nombre"
-      })
-    },
-    {
-      dataField: 'Circunferencia',
-      text: 'Circunferencia (cm)',
-      sort: true,
-      filter: numberFilter(),
-      formatter: (_, row) => Number(row.Circunferencia),
-      type: "number",
-    },
-    // Agrega más columnas según sea necesario
-  ];
   
   const reset = (initial?: {
     Id_Area: number;
@@ -121,14 +97,43 @@ export const Plantas: React.FC = () => {
 
   return (
     <RecordsScreen pageTitle="Árboles de Mango" prepareSubmitForm={prepareSubmitForm}
-      readiness={[readyLotes, ready]}
-      columns={columns} controller={controller} formManager={formManager}
+      readiness={[readyLotes, ready]} controller={controller} formManager={formManager}
+      columns={[
+        {
+          dataField: 'Id_Area',
+          text: 'Área',
+          sort: true,
+          filter: selectFilter({
+            options: filterLotesOptions({
+              getLabel: v => `${v.Codigo} : ${v.NombreCompleto}`,
+              getKey: v => v.id,
+            }),
+          }),
+          formatter: v => `${findLoteById(v).Codigo} : ${findLoteById(v).NombreCompleto}`,
+        },
+        {
+          dataField: 'Nombre',
+          text: 'Nombre',
+          sort: true,
+          filter: textFilter(),
+          formatter: (v, record) => v ? `${record.Codigo_Planta} : ${v}` : record.Codigo_Planta,
+        },
+        {
+          dataField: 'Circunferencia',
+          text: 'Circunferencia (cm)',
+          sort: true,
+          filter: numberFilter(),
+          formatter: (_, row) => Number(row.Circunferencia),
+          type: "number",
+        },
+        // Agrega más columnas según sea necesario
+      ]} 
       formFields__React={<>
         <FormField
           name="Id_Area"
           label="Lote"
           type="select"
-          options={lotesOptions(v => `${v.Codigo} ${v.Nombre}`)}
+          options={lotesOptions(v => `${v.Codigo} : ${v.Nombre}`)}
         />
         <FormField
           type="number"

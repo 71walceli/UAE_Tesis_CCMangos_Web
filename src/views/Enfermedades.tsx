@@ -12,26 +12,26 @@ import { FormField } from '../components/Form';
 export const Enfermedad: React.FC = () => {
   const controller = useCoontroller<ILote>(Endpoints.enfermedad)
   
-  const reset = (initial?: {
-    Codigo: string;
-    Nombre: string;
-    Variedad: string;
-  }) => ({
-    ...initial,
-    Codigo: initial?.Codigo || "",
-    Nombre: initial?.Nombre || "",
-  });
-  
-  const formValidator: Object = {
-    Nombre: v => {
-      if (v.length < 5) 
-        throw new ValidationError("Al menos 5 caracteres")
-      v = v.split(" ")
-      if (v.filter(w => !/^[A-ZÁÉÍÓÚÜÑa-záéíóúü0-9ñ.-:]{1,20}$/.test(w)).length > 0) 
-        throw new ValidationError("Debe ser uno o más nombres y/o dígitos.")
-    },
-  };
-  const formManager = useFormManager(reset, formValidator)
+  const formManager = useFormManager(
+    ((initial?: {
+      Codigo: string;
+      Nombre: string;
+      Variedad: string;
+    }) => ({
+      ...initial,
+      Codigo: initial?.Codigo || "",
+      Nombre: initial?.Nombre || "",
+    })), 
+    {
+      Nombre: v => {
+        if (v.length < 5)
+          throw new ValidationError("Al menos 5 caracteres");
+        v = v.split(" ");
+        if (v.filter(w => !/^[A-ZÁÉÍÓÚÜÑa-záéíóúü0-9ñ.-:]{1,20}$/.test(w)).length > 0)
+          throw new ValidationError("Debe ser uno o más nombres y/o dígitos.");
+      },
+    }
+  )
 
   const prepareSubmitForm = data => ({
     ...data,
