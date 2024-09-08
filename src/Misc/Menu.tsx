@@ -6,7 +6,7 @@ export const AppMenu = [
         {
           icon: "bi-cloud",
           title: "Datos edafoclimáticos",
-          link: "/crop/trees",
+          link: "/weather/sync",
           description: "Datos de temperatura, humedad, lluvia, viento, entre otros.",
         },
         {
