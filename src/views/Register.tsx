@@ -34,12 +34,7 @@ export const Register = () => {
         justifyContent: "center",
         alignItems: "center",
         height: "100vh",
-        backgroundImage:
-          //"conic-gradient(at center top, rgb(17, 24, 39), rgb(88, 28, 135), rgb(124, 58, 237))",
-        //"linear-gradient(to right, rgb(16, 185, 129), rgb(101, 163, 13))"
-        //"linear-gradient(to right, #92fe9d, #00c9ff)"
-        "radial-gradient(circle, rgba(0,85,60,1) 20%, rgba(114,176,29,1) 100%)",
-
+        backgroundImage: "radial-gradient(circle, rgba(0,85,60,1) 20%, rgba(114,176,29,1) 100%)",
       }}
     >
       <CardRegister onLogin={isLogin}></CardRegister>

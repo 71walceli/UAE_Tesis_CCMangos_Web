@@ -52,10 +52,11 @@ export const Variedad: React.FC = () => {
       },
     })
 
-  const prepareSubmitForm = data => ({
-    ...data,
-    Codigo: `V${data.Nombre.substring(0, 2)}${Math.random().toString(36).substring(2, 4)}`,
-  })
+    const prepareSubmitForm = data => ({
+      ...data,
+      Codigo: data.Codigo 
+        || `E${data.Nombre.substring(0, 2)}${Math.random().toString(36).substring(2, 4)}`,
+    })
 
   return <RecordsScreen formManager={formManager} controller={controller} 
     prepareSubmitForm={prepareSubmitForm}

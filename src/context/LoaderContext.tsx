@@ -1,5 +1,6 @@
 import React, { createContext, useState } from "react";
-import { LoaderAnimation } from "./../views/Loader";
+import { LoaderAnimation } from "../components/LoaderAnimation";
+
 // Definir el tipo de estado del loader
 type LoaderContextProps = {
   isLoading: boolean;

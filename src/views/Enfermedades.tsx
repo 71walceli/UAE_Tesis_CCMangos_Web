@@ -35,7 +35,8 @@ export const Enfermedad: React.FC = () => {
 
   const prepareSubmitForm = data => ({
     ...data,
-    Codigo: `V${data.Nombre.substring(0, 2)}${Math.random().toString(36).substring(2, 4)}`,
+    Codigo: data.Codigo 
+      || `E${data.Nombre.substring(0, 2)}${Math.random().toString(36).substring(2, 4)}`,
   })
 
 

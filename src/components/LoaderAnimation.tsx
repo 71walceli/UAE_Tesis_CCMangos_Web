@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import lottie from "lottie-web";
-import animationData from "./../assets/Loader/SpinerLoader.json"; // Reemplaza esto con la ruta correcta a tu archivo JSON
+import animationData from "../assets/Loader/SpinerLoader.json"; // Reemplaza esto con la ruta correcta a tu archivo JSON
 
 export const LoaderAnimation = () => {
   useEffect(() => {
