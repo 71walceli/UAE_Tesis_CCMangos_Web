@@ -56,7 +56,7 @@
   },
   "scripts": {
     "start": "react-app-rewired start",
-    "build": "CI=false react-app-rewired build",
+    "build": "CI=false react-app-rewired build --asset-prefix /mangos/",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject"
   },
@@ -81,5 +81,6 @@
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/leaflet": "^1.9.12"
-  }
+  },
+  "homepage": "/mangos/"
 }
