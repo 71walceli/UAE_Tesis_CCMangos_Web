@@ -153,7 +153,7 @@ export const Lotes: React.FC = () => {
         />
         <FormField
           name="Codigo_Area"
-          label="Código de área"
+          label="Código de lote"
           placeholder="Ejemplo: L01"
         />
         <FormField

@@ -104,11 +104,12 @@ export const Estimaciones = () => {
       lotes: p.length,
       anio: Number(p[0].Fecha.substring(0, 4)),
     }))
-    .value(), [_cosechas])
+    .value(), [_cosechas]
+  )
   useEffect(() => console.log({cosechas}), [cosechas])
 
-  const handleGetCosechas = async () => {
-    setCosechasPredichas(await (get(Endpoints.PrediccionesCosecha).then(({ results }) => Object.fromEntries(
+  const handleGetCosechas = async () => setCosechasPredichas(await (get(Endpoints.PrediccionesCosecha)
+    .then(({ results }) => Object.fromEntries(
       Object.entries(results)
         .map(([variedad, r]) => [variedad, ({
           ...r,
@@ -116,9 +117,13 @@ export const Estimaciones = () => {
           value: r.value.map(v => Number(v) * cosechas[variedad].lotes),
           max: r.max.map(v => Number(v) * cosechas[variedad].lotes),
         })])
-    )
-    )));
-  }
+    ))
+    .catch(e => {
+      if (e instanceof TypeError && e.message === "Cannot read properties of undefined (reading 'lotes'") {
+        // FIX, sino error aparece como si fuera de recuperar datos.
+      }
+    })
+  ))
   const [ cosechasPredichas, setCosechasPredichas] = useState();
   useEffect(() => {
     (async () => {
