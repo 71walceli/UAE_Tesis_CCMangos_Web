@@ -1,15 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { 
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate, } from "react-router-dom";
 import { Login } from "./views/Login";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 
-import { Register } from "./views/Register";
 import { useAuth } from "./context/AuthContext";
 import { Home } from "./views/Home";
 import { Lotes } from "./views/Lotes";
@@ -40,39 +34,37 @@ const App: React.FC = () => {
   if (!isReady) {
     return null;
   }
-  console.log(isAuthenticated)
+  
+  const publicUrl = process.env.PUBLIC_URL || ""
+
   return (
     <>
       <Router>
         <Routes>
           {isAuthenticated ? (
             <>
-              <Route path="/" element={<Navigate to="/home" />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/crop/areas" element={<Áreas />} />
-              <Route path="/crop/lots" element={<Lotes />} />
-              <Route path="/crop/trees" element={<Plantas />} />
-              <Route path="/crop/readings" element={<Lecturas/>} />
-              <Route path="/crop/production" element={<Produccion/>} />
-              <Route path="/crop/affection" element={<Enfermedad/>} />
-              <Route path="/crop/variety" element={<Variedad/>} />
-              <Route path="/weather/sync" element={<Sincronizaciones/>} />
-              <Route path="/auth/users" element={<Usuarios/>} />
-              <Route path="/auth/Profile" element={<Profile/>} />
-              <Route path="/auth/role" element={<Roles/>} />
-              <Route path="/pred/averange" element={<Estimaciones/>} />
-              <Route path="/pred/analytics" element={<Estadisticas/>} />
-              <Route path="*" element={<Navigate to="/home" />} />
+              <Route path="*" element={<Navigate to={`${publicUrl}/home`} />} />
+              <Route path={`${publicUrl}/home`} element={<Home />} />
+              <Route path={`${publicUrl}/crop/areas`} element={<Áreas />} />
+              <Route path={`${publicUrl}/crop/lots`} element={<Lotes />} />
+              <Route path={`${publicUrl}/crop/trees`} element={<Plantas />} />
+              <Route path={`${publicUrl}/crop/readings`} element={<Lecturas/>} />
+              <Route path={`${publicUrl}/crop/production`} element={<Produccion/>} />
+              <Route path={`${publicUrl}/crop/affection`} element={<Enfermedad/>} />
+              <Route path={`${publicUrl}/crop/variety`} element={<Variedad/>} />
+              <Route path={`${publicUrl}/weather/sync`} element={<Sincronizaciones/>} />
+              <Route path={`${publicUrl}/auth/users`} element={<Usuarios/>} />
+              <Route path={`${publicUrl}/auth/Profile`} element={<Profile/>} />
+              <Route path={`${publicUrl}/auth/role`} element={<Roles/>} />
+              <Route path={`${publicUrl}/pred/averange`} element={<Estimaciones/>} />
+              <Route path={`${publicUrl}/pred/analytics`} element={<Estadisticas/>} />
             </>
           ) : (
             <>
-              <Route path="/" element={<Navigate to="/auth/login" />} />
-              <Route path="/auth/login" element={<Login />} />
-              <Route path="/auth/register" element={<Register />} />
-              <Route path="*" element={<Navigate to="/auth/login" />} />
+              <Route path="*" element={<Navigate to={`${publicUrl}/auth/login`} />} />
+              <Route path={`${publicUrl}/auth/login`} element={<Login />} />
             </>
           )}
-          <Route path="*" element={<p>La ruta no existe</p>} />
         </Routes>
       </Router>
     </>

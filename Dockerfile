@@ -11,10 +11,11 @@ COPY ./Common/package.json ./Common/yarn.lock ./
 RUN yarn install
 
 WORKDIR /App
-ARG REACT_APP_API_BASE_URL
 
 COPY ./Web /App
 COPY ./Common /Common
+ARG REACT_APP_API_BASE_URL
+ARG PUBLIC_URL
 RUN yarn build
 
 

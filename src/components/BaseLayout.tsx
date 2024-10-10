@@ -4,7 +4,6 @@ import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import { Link } from "react-router-dom";
 
-import banner from './../assets/brand.png'
 import { useAuth } from "./../context/AuthContext";
 
 
@@ -18,12 +17,14 @@ export const BaseLayout: React.FC<BaseLayoutProps> = (
 ) => {
   const { children, PageName } = props;
   const { logout, UserData } = useAuth();
-    
+
+  const publicUrl = process.env.PUBLIC_URL || ""
+
   return (
     <>
       <Navbar collapseOnSelect expand="lg" className="bg-body-tertiary">
         <div className="container-fluid">
-          <Link to="/home">
+          <Link to={`${publicUrl}/home`}>
             <Navbar.Brand>
               <i className="bi bi-house" style={{ fontSize: "2rem", color: "black" }}/>
             </Navbar.Brand>
@@ -36,7 +37,9 @@ export const BaseLayout: React.FC<BaseLayoutProps> = (
             <Nav.Link disabled>
             {UserData?.rol}
             </Nav.Link>
-            <NavDropdown title={<><i className="bi bi-person-circle text-dark icon-username" /> {UserData?.user} </>} id="navbarScrollingDropdown">
+            <NavDropdown id="navbarScrollingDropdown"
+              title={<><i className="bi bi-person-circle text-dark icon-username" /> {UserData?.user} </>} 
+            >
               <NavDropdown.Item href="/auth/porfile">Perfil</NavDropdown.Item>
               <NavDropdown.Divider />
               <NavDropdown.Item href="#action5" onClick={() => logout()}>

@@ -52,8 +52,8 @@ export const Estadisticas = () => {
       "Wind_Speed_Mean",
       "Wind_Speed_Max",
       "Precipitation",
-      "AtmosphericPressure_Min",
-      "AtmosphericPressure_Max",
+      "Atmospheric_Pressure_Min",
+      "Atmospheric_Pressure_Max",
     ]
     return Object.entries(
       _datosClima.reduce((all, item) => {
@@ -93,6 +93,7 @@ export const Estadisticas = () => {
         ])
       )
   }, [_datosClima])
+  useEffect(() => console.log({ datosClimaMensuales }), [datosClimaMensuales])
 
   const { showLoader, hideLoader } = useContext(LoaderContext)
 
@@ -157,7 +158,7 @@ export const Estadisticas = () => {
             title="Precipitaciones" 
           />
           <Chart type="line" className="col-md-6" data={datosClimaMensuales} 
-            series={["AtmosphericPressure_Min", "AtmosphericPressure_Max"]}
+            series={["Atmospheric_Pressure_Min", "Atmospheric_Pressure_Max"]}
             title="Presión Atmosférica" 
           />
         </div>

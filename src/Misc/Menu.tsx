@@ -1,3 +1,5 @@
+const publicUrl = process.env.PUBLIC_URL || ""
+
 export const AppMenu = [
     {
       title: "Producción",
@@ -6,19 +8,19 @@ export const AppMenu = [
         {
           icon: "bi-cloud",
           title: "Datos edafoclimáticos",
-          link: "/weather/sync",
+          link: `${publicUrl}/weather/sync`,
           description: "Datos de temperatura, humedad, lluvia, viento, entre otros.",
         },
         {
           icon: "bi-lightning-charge",
           title: "Cosechas",
-          link: "/crop/production",
+          link: `${publicUrl}/crop/production`,
           description: "Gestión de producción de mango por lotes.",
         },
         {
           icon: "bi-tree",
           title: "Control de árboles",
-          link: "/crop/readings",
+          link: `${publicUrl}/crop/readings`,
           description: "Gestión de controles de árboles de mango de muestra.",
         },
       ]
@@ -30,13 +32,13 @@ export const AppMenu = [
         {
           icon: "bi-bar-chart-fill",
           title: "Estadísticas",
-          link: "/pred/analytics",
+          link: `${publicUrl}/pred/analytics`,
           description: "Análisis de datos de producción y datos edafoclimáticos.",
         },
         {
           icon: "bi-graph-up",
           title: "Estimaciones",
-          link: "/pred/averange",
+          link: `${publicUrl}/pred/averange`,
           description: "Análisis de datos de producción y datos edafoclimáticos.",
         },
       ]
@@ -48,37 +50,37 @@ export const AppMenu = [
         {
           icon: "bi-map-fill",
           title: "Áreas",
-          link: "/crop/areas",
+          link: `${publicUrl}/crop/areas`,
           description: "Gestión de áreas de cultivo.",
         },
         {
           icon: "bi-map-fill",
           title: "Lotes",
-          link: "/crop/lots",
+          link: `${publicUrl}/crop/lots`,
           description: "Gestión de lotes de cultivo.",
         },
         {
           icon: "bi-tree-fill",
           title: "Árboles de Mango",
-          link: "/crop/trees",
+          link: `${publicUrl}/crop/trees`,
           description: "Gestión de árboles de mango de muestra.",
         },
         {
           icon: "bi-people-fill",
           title: "Usuarios",
-          link: "/auth/users",
+          link: `${publicUrl}/auth/users`,
           description: "Gestión de usuarios del sistema y sus roles.",
         },
         {
           icon: "bi-virus",
           title: "Enfermedad",
-          link: "/crop/affection",
+          link: `${publicUrl}/crop/affection`,
           description: "Gestión de enfermedades de los árboles de mango.",
         },
         {
           icon: "bi-tree",
           title: "Variedad",
-          link: "/crop/variety",
+          link: `${publicUrl}/crop/variety`,
           description: "Gestión de variedades de mango.",
         },
       ],

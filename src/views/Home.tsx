@@ -104,33 +104,6 @@ export const Home = () => {
                 }
               </Card.Body>
             </Card>
-            
-            {/* <Card className="m-3">
-              <Card.Header>Árboles</Card.Header>
-              <Card.Body className="row">
-                <div class="col-sm-6">
-                  <h4>49</h4>
-                  Árboles de Tommy Arkins
-                </div>
-                <div class="col-sm-6">
-                  <h4>53</h4>
-                  Árboles de Ataúlfo
-                </div>
-              </Card.Body>
-            </Card> */}
-            {/* <Card className="m-3">
-              <Card.Header>Afectaciones</Card.Header>
-              <Card.Body className="row">
-                <div class="col-sm-6">
-                  <h4>13.23 %</h4>
-                  Antracnosis
-                </div>
-                <div class="col-sm-6">
-                  <h4>24.23 %</h4>
-                  Lasiodiploya
-                </div>
-              </Card.Body>
-            </Card> */}
           </div>
           <div className="col-md-9">
             {AppMenu.map((menu, index) => (
