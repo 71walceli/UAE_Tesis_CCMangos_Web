@@ -13,7 +13,7 @@ import { CircleIconButton } from '../components/CircleIconButton';
 import { useCoontroller } from '../controllers/useController';
 import { formatNumber } from '../../../Common/helpers/formats';
 import { abbreviations, strings } from '../../../Common/misc/resources';
-import { DateRangePicker, InputNumber } from 'rsuite';
+import { InputNumber } from 'rsuite';
 
 
 export const Estimaciones = () => {
